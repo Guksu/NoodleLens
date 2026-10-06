@@ -1277,9 +1277,8 @@ button.cite:hover {
   gap: 3px;
 }
 
-.draft-findings {
-  border-left: 3px solid var(--brand);
-  padding-left: 8px;
+.draft-findings .findings {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--border));
 }
 
 /* ───────── 입력 ───────── */
@@ -1318,10 +1317,14 @@ button.cite:hover {
   flex-direction: column;
   gap: 4px;
   padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--brand);
+  border: 1px solid color-mix(in srgb, var(--brand) 45%, var(--border));
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: color-mix(in srgb, var(--accent-soft) 55%, var(--bg));
+}
+
+.attach-card-head svg {
+  flex: none;
+  color: var(--accent);
 }
 
 .attach-card-head {
