@@ -81,7 +81,8 @@ export function Composer() {
   const text = draft?.text ?? '';
   const attachment = draft?.attachment ?? null;
   const picking = picker.status !== 'idle';
-  const canSend = text.trim().length > 0 && !busy && ready;
+  // 선택 중에 보내면 새 대화의 요소 번호와 선택 결과가 엇갈릴 수 있어 선택을 마친 뒤 보낸다.
+  const canSend = text.trim().length > 0 && !busy && ready && !picking;
 
   const submit = () => {
     if (!canSend) return;
@@ -99,6 +100,7 @@ export function Composer() {
 
   let hint = '';
   if (!ready) hint = `${PROVIDERS[provider].shortLabel} API 키가 필요합니다`;
+  else if (picking) hint = '요소 선택을 마치면 보낼 수 있습니다';
   else if (busy) hint = '답변 생성 중 · 중단하거나 다른 대화를 볼 수 있습니다';
   else if (!hasTarget) hint = '요소를 선택하면 실제 값을 근거로 답합니다';
 

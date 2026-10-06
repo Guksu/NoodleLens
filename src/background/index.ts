@@ -29,5 +29,5 @@ chrome.action.onClicked.addListener((tab) => {
 
 // 세션 보관 API 키와 설정은 확장 프로그램 페이지·service worker에서만 읽을 수 있게 둔다.
 // session은 기본값을 명시하는 것이고, local은 기본적으로 content script에도 열려 있어 막는다(Chrome 140+).
-void chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
+void chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }).catch(() => {});
 void chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }).catch(() => {});
