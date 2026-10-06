@@ -50,9 +50,9 @@ describe('채팅 (모의 제공자)', () => {
     expect(await panel.$$eval('.msg-assistant button.cite', (els) => els.length)).toBeGreaterThan(0);
     expect(await panel.$eval('.msg-assistant .cite.is-unknown', (el) => el.textContent)).toBe('E999?');
     expect(answer.foot).toContain('수집 자료에 없는 식별자 1개(E999)');
-    // 보낸 뒤에는 첨부 카드가 비고 대상 카드는 '이 대화의 대상'이 된다
+    // 보낸 뒤에는 입력창의 첨부가 비고, 위쪽 대상 표시줄은 그대로 남는다
     expect(await panel.$('.attach-card')).toBeNull();
-    expect(await text(panel, '.target-card')).toContain('이 대화의 대상');
+    expect(await text(panel, '.target-label')).toBe('div.seller-name');
   });
 
   it('답변의 근거 칩을 누르면 페이지에서 요소를 강조한다', async () => {

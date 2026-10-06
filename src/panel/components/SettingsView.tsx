@@ -5,7 +5,7 @@ import { countStored } from '../../storage/db';
 import type { KeyPersistence } from '../../storage/secrets';
 import { deleteAllConversations, hasAllSites, removeKey, requestAllSites, revokeAllSites, setShowMock, storeKey } from '../actions';
 import { pushNotice, useStore } from '../store';
-import { Switch } from './ui';
+import { ProviderAvatar, Switch } from './ui';
 
 function KeyCard({ provider }: { provider: 'openai' | 'anthropic' }) {
   const info = PROVIDERS[provider];
@@ -31,7 +31,7 @@ function KeyCard({ provider }: { provider: 'openai' | 'anthropic' }) {
   return (
     <div className="card key-card">
       <div className="card-head">
-        <span className={`provider-dot provider-${provider}`} aria-hidden="true" />
+        <ProviderAvatar provider={provider} />
         <h3>{info.label}</h3>
         {status.present ? (
           <span className="badge badge-ok">

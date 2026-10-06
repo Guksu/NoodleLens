@@ -124,7 +124,7 @@ export async function center(page: Page, selector: string) {
 }
 
 export async function startPicking(panel: Page) {
-  await panel.click('.composer-row .btn-secondary');
+  await panel.click('.pick-btn');
   await panel.waitForSelector('.picking-banner', { timeout: 5000 });
   await panel.waitForFunction(() => document.querySelector('.picking-banner')?.textContent?.includes('클릭하세요'), { timeout: 5000 });
 }

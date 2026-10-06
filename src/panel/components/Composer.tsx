@@ -1,4 +1,4 @@
-import { ArrowUp, Crosshair, Eye, FileText, Square, X } from 'lucide-react';
+import { ArrowUp, Crosshair, Eye, FileText, Paperclip, Square, X } from 'lucide-react';
 import { useMemo, useRef, type KeyboardEvent } from 'react';
 import { analyzeSnapshot } from '../../shared/analysis';
 import { estimateTokens, formatSnapshotForModel } from '../../shared/serialize';
@@ -19,15 +19,16 @@ import {
 } from '../actions';
 import { draftKey, useStore } from '../store';
 import { Toasts } from './Toasts';
+import { IconButton } from './ui';
 
-const EXAMPLES = [
-  '이 텍스트가 왜 말줄임되지 않을까?',
-  '이 요소 때문에 가로 스크롤이 생기는 걸까?',
-  '이 요소가 부모의 가운데에 오지 않는 이유가 뭘까?',
-  '이 이미지 때문에 레이아웃이 밀리는 걸까?',
-];
+const EXAMPLES = ['왜 말줄임되지 않을까?', '가로 스크롤의 원인일까?', '왜 가운데로 오지 않을까?', '레이아웃을 밀어내나?'];
 
-function AttachmentCard({ snapshot }: { snapshot: StoredSnapshot }) {
+function formatTokens(value: number): string {
+  return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value);
+}
+
+/** 이번 질문에 첨부되는 자료. 입력 상자 안 맨 위에 한 줄로 둔다. */
+function AttachmentRow({ snapshot }: { snapshot: StoredSnapshot }) {
   const target = getTarget(snapshot);
   const tokens = useMemo(
     () => estimateTokens(formatSnapshotForModel(snapshot, snapshot.exclusions, analyzeSnapshot(snapshot))),
@@ -36,31 +37,27 @@ function AttachmentCard({ snapshot }: { snapshot: StoredSnapshot }) {
   const excludedCount = snapshot.exclusions.elementIds.length;
   return (
     <div className="attach-card" aria-label="이번 질문에 첨부되는 자료">
-      <div className="attach-card-head">
-        <FileText size={14} aria-hidden="true" />
-        <span className="attach-card-title">이번 질문에 첨부</span>
+      <Paperclip size={13} className="attach-card-icon" aria-hidden="true" />
+      <span className="attach-card-text">
+        <code className="attach-card-label" title={target.label}>
+          {target.label}
+        </code>
         <span className="attach-card-meta">
-          요소 {snapshot.elements.length - excludedCount}개 · 약 {tokens.toLocaleString('ko-KR')} 토큰
+          요소 {snapshot.elements.length - excludedCount}개 · 약 {formatTokens(tokens)} 토큰
           {excludedCount > 0 && ` · 제외 ${excludedCount}`}
         </span>
-      </div>
-      <code className="attach-card-label" title={target.label}>
-        {target.label}
-      </code>
-      <div className="attach-card-sub">
-        크기 {Math.round(target.rect.width * 10) / 10} × {Math.round(target.rect.height * 10) / 10} / display: {target.styles.display}
-      </div>
-      <div className="attach-card-actions">
-        <button type="button" className="chip-btn" onClick={() => void highlight(snapshot.id, snapshot.targetId)}>
-          <Eye size={13} aria-hidden="true" /> 페이지에서 보기
-        </button>
-        <button type="button" className="chip-btn" onClick={() => openPreview(snapshot.id)}>
-          <FileText size={13} aria-hidden="true" /> 수집 내용
-        </button>
-        <button type="button" className="chip-btn" onClick={() => removeAttachment()} title="이번 질문에서 이 자료를 빼고 보냅니다">
-          <X size={13} aria-hidden="true" /> 제외
-        </button>
-      </div>
+      </span>
+      <span className="attach-card-actions">
+        <IconButton label="페이지에서 보기" className="sm" data-action="view" onClick={() => void highlight(snapshot.id, snapshot.targetId)}>
+          <Eye size={14} />
+        </IconButton>
+        <IconButton label="수집 내용 — 보낼 자료 확인·제외" className="sm" data-action="preview" onClick={() => openPreview(snapshot.id)}>
+          <FileText size={14} />
+        </IconButton>
+        <IconButton label="제외 — 이번 질문에서 빼기" className="sm" data-action="remove" onClick={() => removeAttachment()}>
+          <X size={14} />
+        </IconButton>
+      </span>
     </div>
   );
 }
@@ -101,25 +98,12 @@ export function Composer() {
   let hint = '';
   if (!ready) hint = `${PROVIDERS[provider].shortLabel} API 키가 필요합니다`;
   else if (picking) hint = '요소 선택을 마치면 보낼 수 있습니다';
-  else if (busy) hint = '답변 생성 중 · 중단하거나 다른 대화를 볼 수 있습니다';
-  else if (!hasTarget) hint = '요소를 선택하면 실제 값을 근거로 답합니다';
+  else if (busy) hint = '답변 생성 중 · 다른 대화를 봐도 됩니다';
 
   return (
     <footer className="composer">
       <Toasts placement="inline" />
-      {picking && (
-        <div className="picking-banner" role="status">
-          <Crosshair size={14} aria-hidden="true" />
-          <span>
-            {picker.status === 'starting' ? '선택 모드를 준비하는 중…' : '페이지에서 요소를 클릭하세요 · ↑ 부모 · Esc 취소'}
-          </span>
-          <button type="button" className="link-btn" onClick={cancelPicking}>
-            취소
-          </button>
-        </div>
-      )}
-      {attachment && <AttachmentCard snapshot={attachment} />}
-      {attachment && !hasMessages && !text && (
+      {attachment && !hasMessages && !text && !picking && (
         <div className="examples" aria-label="질문 예시">
           {EXAMPLES.map((example) => (
             <button
@@ -136,13 +120,27 @@ export function Composer() {
           ))}
         </div>
       )}
-      <div className="composer-box">
+      <div className={`composer-box ${picking ? 'is-picking' : ''}`}>
+        {picking ? (
+          <div className="picking-banner" role="status">
+            <span className="picking-pulse" aria-hidden="true" />
+            <span className="picking-text">
+              {picker.status === 'starting' ? '선택 모드를 준비하는 중…' : '페이지에서 요소를 클릭하세요'}
+              {picker.status === 'picking' && <span className="picking-keys"> · ↑ 부모 · Esc 취소</span>}
+            </span>
+            <button type="button" className="link-btn" onClick={cancelPicking}>
+              취소
+            </button>
+          </div>
+        ) : (
+          attachment && <AttachmentRow snapshot={attachment} />
+        )}
         <textarea
           ref={textRef}
           key={key}
           className="composer-input"
           value={text}
-          placeholder={attachment || hasTarget ? '선택한 요소에 대해 질문하세요' : '질문을 입력하세요 (먼저 요소를 선택하면 더 정확합니다)'}
+          placeholder={attachment || hasTarget ? '선택한 요소에 대해 질문하세요' : '요소를 선택하고 질문하세요'}
           aria-label="질문 입력"
           rows={1}
           onChange={(event) => setDraftText(event.target.value)}
@@ -150,20 +148,20 @@ export function Composer() {
         />
         <div className="composer-row">
           {picking ? (
-            <button type="button" className="btn btn-secondary btn-sm" onClick={cancelPicking}>
+            <button type="button" className="pick-btn is-active" onClick={cancelPicking}>
               <X size={14} aria-hidden="true" />
-              <span className="btn-label">선택 취소</span>
+              <span>선택 취소</span>
             </button>
           ) : (
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="pick-btn"
               onClick={() => void startPicking()}
               disabled={access === 'restricted' || access === 'none'}
-              title={access === 'unknown' ? '이 탭 접근 권한이 필요할 수 있습니다' : '페이지에서 요소 선택'}
+              title={access === 'unknown' ? '이 탭은 접근 권한이 필요할 수 있습니다' : '페이지에서 요소 선택'}
             >
               <Crosshair size={14} aria-hidden="true" />
-              <span className="btn-label">요소 선택</span>
+              <span>요소 선택</span>
             </button>
           )}
           <span className="composer-hint">
@@ -179,11 +177,11 @@ export function Composer() {
           </span>
           {busy && activeId ? (
             <button type="button" className="send-btn is-stop" onClick={() => cancel(activeId)} aria-label="응답 생성 중단" title="응답 생성 중단">
-              <Square size={13} fill="currentColor" aria-hidden="true" />
+              <Square size={11} fill="currentColor" aria-hidden="true" />
             </button>
           ) : (
             <button type="button" className="send-btn" onClick={submit} disabled={!canSend} aria-label="보내기" title="보내기 (Enter)">
-              <ArrowUp size={16} aria-hidden="true" />
+              <ArrowUp size={16} strokeWidth={2.4} aria-hidden="true" />
             </button>
           )}
         </div>

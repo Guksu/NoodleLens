@@ -9,6 +9,7 @@ import { providerReady, setView, startPicking } from '../actions';
 import { draftKey, useStore } from '../store';
 import { FindingsCard } from './Findings';
 import { AssistantMessageView, UserMessageView } from './MessageItem';
+import { Logo } from './ui';
 
 const STICK_THRESHOLD = 56;
 
@@ -18,33 +19,40 @@ function EmptyGuide() {
   const picking = useStore((s) => s.picker.status !== 'idle');
   return (
     <div className="empty-guide">
-      <h2>궁금한 요소를 골라 질문하세요</h2>
-      <ol>
+      <Logo size={36} />
+      <h2>요소를 골라 물어보세요</h2>
+      <p className="empty-lead">선택한 요소의 실제 스타일과 크기를 근거로 원인과 수정안을 설명합니다.</p>
+      <ol className="empty-steps">
         <li>
-          아래 <strong>요소 선택</strong>을 누릅니다.
+          <span className="step-num">1</span>
+          <span>
+            <strong>요소 선택</strong>을 누르고 페이지에서 문제가 보이는 요소를 클릭
+          </span>
         </li>
         <li>
-          페이지에서 문제가 보이는 요소를 클릭합니다. <kbd>↑</kbd>로 부모 요소, <kbd>Esc</kbd>로 취소.
+          <span className="step-num">2</span>
+          <span>
+            <kbd>↑</kbd> 부모 요소 · <kbd>Esc</kbd> 취소
+          </span>
         </li>
-        <li>무엇이 이상한지 질문합니다. 선택한 요소의 실제 스타일과 크기를 근거로 답합니다.</li>
+        <li>
+          <span className="step-num">3</span>
+          <span>“왜 말줄임되지 않을까?”처럼 궁금한 점을 질문</span>
+        </li>
       </ol>
-      <p className="empty-examples">예: “이 텍스트가 왜 말줄임되지 않을까?”, “이 요소 때문에 가로 스크롤이 생길까?”</p>
-      <div className="empty-actions">
-        <button type="button" className="btn btn-primary btn-md" onClick={() => void startPicking()} disabled={picking || access === 'restricted'}>
-          <Crosshair size={15} aria-hidden="true" />
-          <span className="btn-label">요소 선택</span>
-        </button>
-      </div>
-      {access === 'unknown' && (
-        <p className="empty-note">이 탭은 아직 접근 권한이 없습니다. 툴바의 NoodleLens 아이콘을 누르면 이 탭에서 선택할 수 있습니다.</p>
-      )}
+      <button type="button" className="btn btn-primary btn-md empty-cta" onClick={() => void startPicking()} disabled={picking || access === 'restricted'}>
+        <Crosshair size={15} aria-hidden="true" />
+        <span className="btn-label">요소 선택</span>
+      </button>
+      {access === 'unknown' && <p className="empty-note">이 탭은 아직 접근 권한이 없습니다. 툴바의 NoodleLens 아이콘을 누르면 이 탭에서 선택할 수 있습니다.</p>}
       {!hasKey && (
         <p className="empty-note">
-          모델에 질문하려면 API 키가 필요합니다.{' '}
+          질문하려면 API 키가 필요합니다.{' '}
           <button type="button" className="link-btn" onClick={() => setView('settings')}>
-            설정에서 키 입력
+            설정에서 입력
           </button>
-          {' '}— 키가 없어도 요소 선택과 기본 검사는 쓸 수 있습니다.
+          <br />
+          키가 없어도 요소 선택과 기본 검사는 쓸 수 있습니다.
         </p>
       )}
     </div>
@@ -126,7 +134,7 @@ export function MessageList() {
           })}
           {draftAttachment && (
             <div className="draft-findings">
-              <FindingsCard snapshot={draftAttachment} title="선택한 요소의 기본 검사" defaultOpen />
+              <FindingsCard snapshot={draftAttachment} title="기본 검사" defaultOpen />
             </div>
           )}
         </div>
