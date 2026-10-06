@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  padding: 16px;
+  font: 14px/1.5 system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  color: #1b1d24;
+  background: #fafaf7;
+}
+
+.demo-header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.demo-header p {
+  margin: 0 0 16px;
+  color: #555;
+}
+
+.demo-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.case {
+  padding: 10px 12px 14px;
+  border: 1px solid #e3dfd6;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.case h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #888;
+}
+
+.field {
+  display: block;
+  margin: 4px 0;
+}
