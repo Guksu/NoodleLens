@@ -18,6 +18,7 @@ import {
   startPicking,
 } from '../actions';
 import { draftKey, useStore } from '../store';
+import { Toasts } from './Toasts';
 
 const EXAMPLES = [
   '이 텍스트가 왜 말줄임되지 않을까?',
@@ -103,6 +104,7 @@ export function Composer() {
 
   return (
     <footer className="composer">
+      <Toasts placement="inline" />
       {picking && (
         <div className="picking-banner" role="status">
           <Crosshair size={14} aria-hidden="true" />

@@ -109,7 +109,8 @@ export const AssistantMessageView = memo(function AssistantMessageView({
   const phase = useStore((s) => s.phases[message.id]);
   const citations = useCitationMap(message.conversationId, message.replyTo);
   const check = useMemo(() => validateCitations(message.text, new Set(citations.keys())), [message.text, citations]);
-  const [expanded, setExpanded] = useState(!superseded);
+  // 새 시도가 생기면 이전 시도는 접는다. 사용자가 펼친 경우만 그대로 둔다.
+  const [expanded, setExpanded] = useState(false);
   const active = message.status === 'pending' || message.status === 'streaming';
 
   if (superseded && !expanded) {

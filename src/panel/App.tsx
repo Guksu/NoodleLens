@@ -40,7 +40,7 @@ export function App() {
       {view === 'history' && <HistoryView />}
       {view === 'settings' && <SettingsView />}
       {preview && <PreviewSheet snapshotId={preview} />}
-      <Toasts />
+      {view !== 'chat' && <Toasts placement="floating" />}
     </div>
   );
 }

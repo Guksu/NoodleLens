@@ -98,6 +98,11 @@ function watchTabs() {
     if (info.status === 'complete' || info.url !== undefined || info.title !== undefined || info.status === 'loading') {
       void refreshActiveTab();
     }
+    // 페이지 로딩이 끝나면 대상 요소가 아직 있는지 다시 본다(뒤로 가기 복원 포함).
+    if (info.status === 'complete') {
+      const target = visibleTargetSnapshot();
+      if (target && target.source.tabId === tabId) void checkLive(target.id);
+    }
   });
   chrome.runtime.onMessage.addListener((message: unknown) => {
     const m = message as { type?: string; windowId?: number };
@@ -368,9 +373,19 @@ export function cancelPicking() {
 
 async function sessionFor(snapshot: StoredSnapshot): Promise<PortSession> {
   if (!snapshot.source.documentId) throw new PageGoneError();
-  const session = await bridge.reconnect(snapshot.source.tabId, snapshot.source.documentId);
+  // 이미 이동한 것으로 아는 문서는 짧게만 확인한다(뒤로 가기로 돌아왔을 수도 있어 시도는 한다).
+  const knownGone = store.get().live[snapshot.id] === 'page-gone';
+  const session = await bridge.reconnect(snapshot.source.tabId, snapshot.source.documentId, knownGone ? 700 : 1500);
   watchSessionClose(session);
   return session;
+}
+
+/** 지금 보이는 대상 스냅샷(전송 대기 첨부 또는 대화의 마지막 스냅샷) */
+function visibleTargetSnapshot(state = store.get()): StoredSnapshot | undefined {
+  const draft = state.drafts[draftKey(state)]?.attachment;
+  if (draft) return draft;
+  const conversation = currentConversation(state);
+  return conversation?.lastSnapshotId ? state.snapshots[conversation.lastSnapshotId] : undefined;
 }
 
 /** 같은 요소를 지금 상태로 다시 잰다. 결과는 key 초안에 첨부한다. */

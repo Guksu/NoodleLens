@@ -191,13 +191,25 @@ export class ContentBridge {
     return this.session(tabId, documentId);
   }
 
-  /** 이미 수집한 문서에 다시 연결. 문서가 사라졌으면 PageGoneError */
-  async reconnect(tabId: number, documentId: string): Promise<PortSession> {
-    const session = this.session(tabId, documentId);
-    // 연결이 실제로 성립하는지 짧게 확인한다.
+  /**
+   * 이미 수집한 문서에 다시 연결. 문서가 사라졌으면 PageGoneError.
+   * 이동한 문서가 뒤로 가기 캐시(BFCache)에 있으면 포트가 바로 끊기지 않고 응답만 없으므로 짧게 기다린다.
+   */
+  async reconnect(tabId: number, documentId: string, timeoutMs = 1500): Promise<PortSession> {
+    let session: PortSession;
+    try {
+      session = this.session(tabId, documentId);
+    } catch {
+      throw new PageGoneError();
+    }
     const reqId = makeId('r');
-    const reply = await session.request({ kind: 'element-status', reqId, snapshotId: 'probe', elementId: 'E1' }, 3000);
-    if (reply.kind !== 'element-status-result') throw new PageGoneError();
+    try {
+      const reply = await session.request({ kind: 'element-status', reqId, snapshotId: 'probe', elementId: 'E1' }, timeoutMs);
+      if (reply.kind !== 'element-status-result') throw new PageGoneError();
+    } catch {
+      session.disconnect();
+      throw new PageGoneError();
+    }
     return session;
   }
 

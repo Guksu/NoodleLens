@@ -1,11 +1,15 @@
 import { X } from 'lucide-react';
 import { dismissNotice, useStore } from '../store';
 
-export function Toasts() {
+/**
+ * 알림. 채팅 화면에서는 입력창 위 흐름 안(inline)에 두어 버튼을 덮지 않고,
+ * 기록·설정 화면에서는 아래쪽에 띄운다(floating).
+ */
+export function Toasts({ placement }: { placement: 'inline' | 'floating' }) {
   const notices = useStore((s) => s.notices);
   if (notices.length === 0) return null;
   return (
-    <div className="toasts" role="status" aria-live="polite">
+    <div className={`toasts toasts-${placement}`} role="status" aria-live="polite">
       {notices.map((notice) => (
         <div key={notice.id} className={`toast toast-${notice.tone}`}>
           <span className="toast-text">{notice.text}</span>
