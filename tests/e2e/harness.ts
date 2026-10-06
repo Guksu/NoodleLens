@@ -238,3 +238,61 @@ export async function askAndWaitStart(panel: Page, question: string, minChars = 
     minChars,
   );
 }
+
+/** CDP로 closed shadow root까지 내려가 오버레이 강조 상자(.box)의 style을 읽는다 */
+export async function overlayBoxStyle(page: Page): Promise<string | null> {
+  const client = await page.createCDPSession();
+  try {
+    const { root } = (await client.send('DOM.getDocument', { depth: -1, pierce: true })) as { root: CdpNode };
+    const find = (node: CdpNode, inOverlay: boolean): CdpNode | null => {
+      const here = inOverlay || node.nodeName === 'NOODLELENS-OVERLAY';
+      if (here && node.attributes) {
+        const attrs = node.attributes;
+        const cls = attrs[attrs.indexOf('class') + 1];
+        if (attrs.includes('class') && cls === 'box') return node;
+      }
+      for (const child of [...(node.children ?? []), ...(node.shadowRoots ?? [])]) {
+        const found = find(child, here);
+        if (found) return found;
+      }
+      return null;
+    };
+    const box = find(root, false);
+    if (!box?.attributes) return null;
+    const index = box.attributes.indexOf('style');
+    return index >= 0 ? box.attributes[index + 1] ?? null : null;
+  } finally {
+    await client.detach();
+  }
+}
+
+interface CdpNode {
+  nodeName: string;
+  attributes?: string[];
+  children?: CdpNode[];
+  shadowRoots?: CdpNode[];
+}
+
+/** 확장 프로그램 content script(isolated world)가 window에 붙인 이벤트 리스너 수 */
+export async function windowListenerCount(page: Page, type: string, extensionId: string): Promise<number> {
+  const client = await page.createCDPSession();
+  const contexts: Array<{ id: number; origin: string; auxData?: { type?: string } }> = [];
+  client.on('Runtime.executionContextCreated', (event: { context: { id: number; origin: string; auxData?: { type?: string } } }) => {
+    contexts.push(event.context);
+  });
+  try {
+    await client.send('Runtime.enable');
+    const isolated = contexts.find((c) => c.auxData?.type === 'isolated' && c.origin.includes(extensionId));
+    if (!isolated) return 0;
+    const { result } = (await client.send('Runtime.evaluate', { expression: 'window', contextId: isolated.id })) as {
+      result: { objectId: string };
+    };
+    const { listeners } = (await client.send('DOMDebugger.getEventListeners', { objectId: result.objectId })) as {
+      listeners: Array<{ type: string }>;
+    };
+    return listeners.filter((l) => l.type === type).length;
+  } finally {
+    await client.send('Runtime.disable').catch(() => {});
+    await client.detach();
+  }
+}

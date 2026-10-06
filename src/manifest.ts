@@ -5,7 +5,8 @@
  * - storage: 설정·세션 동안만 보관하는 API 키(chrome.storage.session)
  * - scripting + activeTab: 사용자가 툴바 아이콘을 누른 탭에만 요소 선택 스크립트를 주입
  * - optional_host_permissions: 사용자가 원할 때만 '모든 사이트에서 바로 선택'을 허용
- * - LLM API 호출은 CORS로 처리되어 host_permissions가 필요 없다.
+ * - host_permissions(API 두 곳): OpenAI는 잘못된 키 등 오류 응답에 CORS 헤더를 붙이지 않아(2026-10-06 실측)
+ *   CORS만으로는 오류 내용을 읽지 못하고 네트워크 오류로 보인다. 제공자 오류를 구분해 안내하려고 이 두 호스트만 요청한다.
  */
 export interface ManifestOptions {
   version: string;
@@ -55,6 +56,7 @@ export function buildManifest({ version, mode }: ManifestOptions) {
       type: 'module',
     },
     permissions: ['sidePanel', 'storage', 'scripting', 'activeTab'],
+    host_permissions: ['https://api.openai.com/*', 'https://api.anthropic.com/*'],
     optional_host_permissions: ['https://*/*', 'http://*/*'],
     commands: {
       _execute_action: {

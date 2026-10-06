@@ -79,6 +79,27 @@ describe('채팅 (모의 제공자)', () => {
     expect(String(saved?.text ?? '').length).toBeGreaterThan(20);
   });
 
+  it('위쪽을 읽는 동안에는 새 내용이 와도 강제로 내리지 않고 최신 답변 버튼을 보여 준다', async () => {
+    await panel.setViewport({ width: 360, height: 520 });
+    await askAndWaitStart(panel, '스크롤 시험 #mock:slow', 5);
+    await panel.evaluate(() => document.querySelector('.messages')!.scrollTo(0, 0));
+    await sleep(150);
+    await panel.waitForFunction(
+      () => {
+        const all = document.querySelectorAll('.msg-assistant');
+        return (all[all.length - 1]?.querySelector('.markdown')?.textContent?.length ?? 0) > 120;
+      },
+      { timeout: 15000 },
+    );
+    expect(await panel.$eval('.messages', (el) => el.scrollTop)).toBe(0);
+    expect(await panel.$('.jump-latest')).not.toBeNull();
+    await panel.click('.jump-latest');
+    await sleep(100);
+    const atBottom = await panel.$eval('.messages', (el) => el.scrollHeight - el.scrollTop - el.clientHeight < 60);
+    expect(atBottom).toBe(true);
+    await waitForAnswer(panel, 'complete', 30000);
+  });
+
   it('보내는 중 Enter를 연달아 눌러도 질문은 한 번만 저장된다', async () => {
     const before = (await readDb(panel)).messages.filter((m) => m.role === 'user').length;
     await panel.click('.composer-input');

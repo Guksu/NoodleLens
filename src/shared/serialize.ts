@@ -2,7 +2,7 @@
  * 스냅샷을 모델에 보낼 텍스트로 바꾼다.
  *
  * 페이지에서 온 문자열(제목, URL, 속성, 글, 클래스, computed 값의 문자열 등)은 모두
- * '<' '>'를 이스케이프해서 <page_snapshot> 경계를 흉내 낼 수 없게 한다.
+ * '<'를 이스케이프해서 <page_snapshot> 같은 태그 경계를 흉내 낼 수 없게 한다('>' 혼자로는 태그를 열 수 없다).
  * 사용자가 제외한 요소·글·속성·URL은 넣지 않는다. 미리보기 화면도 이 결과를 그대로 보여 준다.
  */
 import type { Finding } from './analysis';
@@ -25,7 +25,7 @@ const KIND_LABEL: Record<Finding['kind'], string> = {
 };
 
 export function escapeAngles(value: string): string {
-  return value.replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+  return value.replace(/</g, '\\u003c');
 }
 
 /** 페이지 문자열을 따옴표로 감싸고 이스케이프한다 */

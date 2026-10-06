@@ -30,7 +30,7 @@ describe('모델 전송 텍스트', () => {
     expect(inner).not.toContain('</page_snapshot>');
     expect(inner).not.toContain('<b>');
     expect(text.match(/<\/page_snapshot>/g)).toHaveLength(1);
-    expect(escapeAngles('<a>')).toBe('\\u003ca\\u003e');
+    expect(escapeAngles('<a>')).toBe('\\u003ca>');
   });
 
   it('사용자가 제외한 요소·글·속성·URL은 넣지 않는다', () => {

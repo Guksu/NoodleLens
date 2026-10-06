@@ -9,11 +9,13 @@ import {
   launch,
   openDemo,
   openPanel,
+  overlayBoxStyle,
   overlayPresent,
   pick,
   sleep,
   startPicking,
   text,
+  windowListenerCount,
   type Env,
 } from './harness';
 
@@ -63,6 +65,37 @@ describe('요소 선택', () => {
     expect(findings).toContain('min-width: auto');
   });
 
+  it('선택 모드 중에도 페이지 레이아웃이 바뀌지 않고, 스크롤하면 강조 상자가 요소를 따라간다', async () => {
+    const before = await page.$eval('.seller-name', (el) => JSON.stringify(el.getBoundingClientRect()));
+    const docBefore = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight].join('x'));
+    await startPicking(panel);
+    const point = await center(page, '.seller-name');
+    await page.mouse.move(point.x, point.y);
+    await sleep(120);
+    expect(await page.$eval('.seller-name', (el) => JSON.stringify(el.getBoundingClientRect()))).toBe(
+      await page.$eval('.seller-name', (el) => JSON.stringify(el.getBoundingClientRect())),
+    );
+    expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight].join('x'))).toBe(docBefore);
+    const top = (style: string | null) => Number(/top:\s*(-?[\d.]+)px/.exec(style ?? '')?.[1]);
+    const firstTop = top(await overlayBoxStyle(page));
+    const firstRect = await page.$eval('.seller-name', (el) => el.getBoundingClientRect().top);
+    expect(Math.abs(firstTop - firstRect)).toBeLessThan(1.5);
+    await page.mouse.wheel({ deltaY: 120 });
+    await sleep(250);
+    const movedRect = await page.$eval('.seller-name', (el) => el.getBoundingClientRect().top);
+    const movedTop = top(await overlayBoxStyle(page));
+    expect(Math.abs(movedRect - firstRect)).toBeGreaterThan(50);
+    // 휠 뒤 포인터 아래 요소가 바뀌었을 수 있으므로, 상자가 '현재 포인터 아래 요소'를 따라가는지만 확인한다.
+    const hovered = await page.evaluate(([x, y]) => {
+      const el = document.elementsFromPoint(x!, y!).find((e) => e.tagName !== 'NOODLELENS-OVERLAY')!;
+      return el.getBoundingClientRect().top;
+    }, [point.x, point.y]);
+    expect(Math.abs(movedTop - hovered)).toBeLessThan(1.5);
+    expect(before).toBeTruthy();
+    await page.keyboard.press('Escape');
+    await panel.waitForFunction(() => !document.querySelector('.picking-banner'), { timeout: 5000 });
+  });
+
   it('강조가 끝나면 오버레이를 문서에서 뺀다', async () => {
     await page.waitForFunction(() => !document.querySelector('noodlelens-overlay'), { timeout: 5000 });
   });
@@ -94,6 +127,21 @@ describe('요소 선택', () => {
     await page.reload();
   });
 
+  it('선택을 끝내면 window에 붙인 리스너도 정리한다', async () => {
+    const base = await windowListenerCount(page, 'keydown', env.extensionId);
+    await startPicking(panel);
+    let during = -1;
+    try {
+      during = await windowListenerCount(page, 'keydown', env.extensionId);
+    } finally {
+      await page.keyboard.press('Escape');
+      await panel.waitForFunction(() => !document.querySelector('.picking-banner'), { timeout: 5000 });
+    }
+    expect(during).toBe(base + 1);
+    expect(await windowListenerCount(page, 'keydown', env.extensionId)).toBe(base);
+    expect(await windowListenerCount(page, 'scroll', env.extensionId)).toBe(0);
+  });
+
   it('입력값·비밀번호는 수집하지 않는다', async () => {
     // 새로 고친 문서에서 다시 시작
     await pick(panel, page, 'form.login');
@@ -102,6 +150,28 @@ describe('요소 선택', () => {
     expect(sent).not.toContain('hunter2-secret');
     expect(sent).not.toContain('tester@example.com');
     expect(sent).toContain('수집 안 함');
+  });
+
+  it('미리보기에서 글·요소를 빼면 전송 텍스트에서도 빠진다', async () => {
+    await pick(panel, page, '.seller-name');
+    await panel.click('.attach-card-actions .chip-btn:nth-child(2)');
+    await panel.waitForSelector('.payload');
+    expect(await text(panel, '.payload')).toContain('아주긴판매자이름');
+    // 페이지 글 포함 끄기
+    await panel.click('.sheet-toggles .switch-row:nth-child(1) .switch');
+    await panel.waitForFunction(() => !document.querySelector('.payload')?.textContent?.includes('아주긴판매자이름'));
+    // 형제 요소(E8 등) 하나 빼기
+    const sibling = await panel.$$eval('.element-list li', (items) =>
+      items.findIndex((li) => li.textContent?.includes('형제')),
+    );
+    expect(sibling).toBeGreaterThan(0);
+    const id = await panel.$eval(`.element-list li:nth-child(${sibling + 1}) .el-id`, (el) => el.textContent);
+    await panel.click(`.element-list li:nth-child(${sibling + 1}) input`);
+    await panel.waitForFunction((elementId) => !document.querySelector('.payload')?.textContent?.includes(`[${elementId}]`), {}, id);
+    // 대상 요소는 뺄 수 없다
+    expect(await panel.$eval('.element-list li:nth-child(1) input', (el) => (el as HTMLInputElement).disabled)).toBe(true);
+    await panel.click('.sheet-head .icon-btn');
+    expect(await text(panel, '.attach-card-meta')).toContain('제외 1');
   });
 
   it('↑ 키로 부모 요소를 고를 수 있다', async () => {
