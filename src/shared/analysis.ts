@@ -126,13 +126,16 @@ function checkPageOverflow(snapshot: Snapshot, out: Finding[]) {
         .join(' / '),
       evidence: offenders.map((el) => ({ elementId: el.id, property: 'width', value: el.styles.width ?? fmt(el.rect.width) })),
     });
-  } else if (snapshot.omitted.scanSkipped > 0) {
+  } else {
     out.push({
       code: 'PAGE_OFFENDERS_UNKNOWN',
       category: 'overflow',
       kind: 'info',
       title: '넘침 원인 요소를 찾지 못함',
-      detail: '검사 상한에 걸려 일부 요소를 확인하지 못했습니다.',
+      detail:
+        snapshot.omitted.scanSkipped > 0
+          ? '검사 상한에 걸려 일부 요소를 확인하지 못했습니다.'
+          : '요소 상자 기준으로는 뷰포트 밖으로 나간 요소가 없습니다. 위치가 지정된 가상 요소(::before/::after)처럼 요소 상자 밖에 그려지는 부분이 원인일 수 있으며, 이번 수집 자료만으로는 확인할 수 없습니다.',
       evidence: [],
     });
   }

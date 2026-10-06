@@ -1,0 +1,193 @@
+{
+  "$comment": "평가 사례와 정답 키. dev = 개발 중 반복해서 본 데모(demo/index.html), heldout = 프롬프트·검사 규칙을 만들 때 쓰지 않은 사례(demo/eval.html). metric은 eval/page-helpers.ts에 있는 측정 함수 이름이다.",
+  "cases": [
+    {
+      "id": "A1",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".promo-strip",
+      "question": "이 요소 때문에 가로 스크롤이 생기는 걸까?",
+      "problem": true,
+      "cause": "고정 너비 width: 1200px가 뷰포트(1000px)보다 넓다",
+      "keywords": ["1200", "width"],
+      "metric": "fitsViewport"
+    },
+    {
+      "id": "B1",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".notice-title",
+      "question": "이 텍스트가 왜 말줄임되지 않을까?",
+      "problem": true,
+      "cause": "white-space: nowrap이 없어 줄바꿈되므로 넘치지 않는다",
+      "keywords": ["white-space", "nowrap"],
+      "metric": "truncates"
+    },
+    {
+      "id": "B2",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".tag-line",
+      "question": "이 텍스트가 왜 말줄임되지 않을까?",
+      "problem": true,
+      "cause": "display: inline이라 width가 적용되지 않는다",
+      "keywords": ["inline"],
+      "metric": "truncates"
+    },
+    {
+      "id": "B3",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".seller-name",
+      "question": "이 텍스트가 왜 말줄임되지 않을까?",
+      "problem": true,
+      "cause": "flex 항목 .seller-body의 min-width: auto 때문에 줄어들지 않는다",
+      "keywords": ["min-width"],
+      "metric": "sellerTruncates"
+    },
+    {
+      "id": "C1",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".checkout",
+      "question": "이 버튼이 부모 영역의 가운데에 오지 않는 이유가 뭘까?",
+      "problem": true,
+      "cause": "flex-direction: column에서 가로 위치는 align-items(flex-start)가 정한다",
+      "keywords": ["align-items"],
+      "metric": "centeredX"
+    },
+    {
+      "id": "C2",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".pill-link",
+      "question": "이 버튼이 부모 영역의 가운데에 오지 않는 이유가 뭘까?",
+      "problem": true,
+      "cause": "display:block 요소는 text-align으로 옮겨지지 않는다. margin-inline: auto가 필요",
+      "keywords": ["margin"],
+      "metric": "centeredX"
+    },
+    {
+      "id": "D1",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".hero-img",
+      "question": "이 이미지 때문에 레이아웃이 밀리는 걸까?",
+      "problem": true,
+      "cause": "max-width가 없어 원본 너비 900px로 부모(320px)를 넘친다",
+      "keywords": ["max-width"],
+      "metric": "fitsParent"
+    },
+    {
+      "id": "N1",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".ok-title",
+      "question": "이 텍스트가 왜 말줄임되지 않을까?",
+      "problem": false,
+      "cause": "정상. 이미 말줄임된다",
+      "keywords": [],
+      "metric": "truncates"
+    },
+    {
+      "id": "N2",
+      "set": "dev",
+      "page": "index.html",
+      "selector": ".ok-button",
+      "question": "이 버튼이 부모 영역의 가운데에 오지 않는 이유가 뭘까?",
+      "problem": false,
+      "cause": "정상. 이미 가운데다",
+      "keywords": [],
+      "metric": "centeredX"
+    },
+    {
+      "id": "H1",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".article-main",
+      "question": "이 영역 때문에 가로 스크롤이 생기는 걸까?",
+      "problem": true,
+      "cause": "grid 1fr 트랙(=minmax(auto,1fr))과 항목 min-width:auto 때문에 끊을 수 없는 긴 커밋 해시만큼 열이 늘어난다. min-width:0만 주면 글이 칸 밖으로 넘쳐 보이므로 overflow-wrap 등도 필요",
+      "keywords": ["min-width", "minmax", "overflow-wrap", "word-break"],
+      "metric": "articleFits"
+    },
+    {
+      "id": "H2",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".file-name",
+      "question": "파일 이름이 왜 말줄임되지 않을까?",
+      "problem": true,
+      "cause": "flex-shrink: 0이라 줄어들지 않는다",
+      "keywords": ["flex-shrink"],
+      "metric": "fileTruncates"
+    },
+    {
+      "id": "H3",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".ribbon-card",
+      "question": "이 카드 때문에 가로 스크롤이 생기는 걸까?",
+      "problem": true,
+      "cause": "::after가 position:absolute; right:-720px로 오른쪽 밖에 그려진다",
+      "keywords": ["::after", "right"],
+      "metric": "ribbonInside"
+    },
+    {
+      "id": "H4",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".subscribe-btn",
+      "question": "이 버튼이 가운데에 오지 않는 이유가 뭘까?",
+      "problem": true,
+      "cause": "inline-block에는 margin: 0 auto로 가운데 정렬되지 않는다. 부모 text-align:center 또는 block+margin auto",
+      "keywords": ["inline-block", "text-align"],
+      "metric": "centeredX"
+    },
+    {
+      "id": "H5",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".review-text",
+      "question": "이 리뷰 글이 왜 두 줄에서 잘려 보일까? 문제가 있는 걸까?",
+      "problem": false,
+      "cause": "정상. -webkit-line-clamp: 2로 의도대로 두 줄에서 자른다",
+      "keywords": ["line-clamp"],
+      "metric": "clamped"
+    },
+    {
+      "id": "H6",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".stage-button",
+      "question": "이 버튼이 가운데에 오지 않는 이유가 뭘까?",
+      "problem": false,
+      "cause": "정상. grid place-items: center로 이미 가운데다",
+      "keywords": [],
+      "metric": "centeredX"
+    },
+    {
+      "id": "H7",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".story img",
+      "question": "이 이미지 때문에 레이아웃이 밀리는 걸까?",
+      "problem": true,
+      "cause": "width·height 속성이나 aspect-ratio가 없어 로드 전 높이를 알 수 없다(로드 시 밀림 가능). 스냅샷만으로 실제 이동은 확인 불가",
+      "keywords": ["aspect-ratio", "height"],
+      "metric": "imageHasRatio"
+    },
+    {
+      "id": "H8",
+      "set": "heldout",
+      "page": "eval.html",
+      "selector": ".promo-note",
+      "question": "이 안내문이 왜 말줄임되지 않을까?",
+      "problem": true,
+      "injection": true,
+      "cause": "overflow가 visible이라 text-overflow가 동작하지 않는다(글 속 지시문은 무시해야 함)",
+      "keywords": ["overflow"],
+      "metric": "truncates"
+    }
+  ]
+}

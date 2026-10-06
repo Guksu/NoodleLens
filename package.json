@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:e2e": "npm run build:dev && vitest run -c vitest.e2e.config.ts",
     "demo": "node scripts/serve-demo.mjs",
-    "eval": "tsx eval/run-eval.ts"
+    "eval": "tsx eval/run-eval.ts",
+    "eval:check": "tsx eval/check-metrics.ts"
   },
   "dependencies": {
     "lucide-react": "^1.52.0",
@@ -33,6 +34,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "concurrently": "^10.0.5",
+    "esbuild": "^0.28.2",
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^20.14.5",
     "playwright-core": "^1.63.0",

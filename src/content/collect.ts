@@ -196,9 +196,14 @@ function pseudoStyles(el: Element, which: '::before' | '::after'): Record<string
   const content = cs.getPropertyValue('content').trim();
   if (content === '' || content === 'none' || content === 'normal') return undefined;
   const out: Record<string, string> = {};
+  const positioned = cs.getPropertyValue('position') !== 'static';
   for (const prop of PSEUDO_PROPS) {
     const value = cs.getPropertyValue(prop).trim();
-    if (value !== '') out[prop] = clip(value, 80);
+    if (value === '') continue;
+    // 위치 값은 위치가 지정된 가상 요소일 때만 의미가 있다.
+    if (!positioned && ['top', 'right', 'bottom', 'left'].includes(prop)) continue;
+    if (prop === 'transform' && value === 'none') continue;
+    out[prop] = clip(value, 80);
   }
   return out;
 }

@@ -88,7 +88,7 @@ export const NON_DEFAULT_PROPS: Record<string, readonly string[]> = {
   'white-space': ['normal'],
 };
 
-export const PSEUDO_PROPS = ['content', 'display', 'position', 'width', 'height'] as const;
+export const PSEUDO_PROPS = ['content', 'display', 'position', 'width', 'height', 'top', 'right', 'bottom', 'left', 'transform'] as const;
 
 export const ALLOWED_STYLE_KEYS: ReadonlySet<string> = new Set<string>([
   ...Object.keys(BOX_SHORTHANDS),
