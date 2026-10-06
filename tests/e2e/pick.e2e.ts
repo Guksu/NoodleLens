@@ -35,7 +35,7 @@ afterAll(async () => {
 });
 
 async function payload(): Promise<string> {
-  await panel.click('.attach-card-actions .chip-btn:nth-child(2)');
+  await panel.click('.attach-card-actions [data-action="preview"]');
   await panel.waitForSelector('.payload');
   const value = await text(panel, '.payload');
   await panel.click('.sheet-head .icon-btn');
@@ -59,7 +59,8 @@ describe('요소 선택', () => {
     await page.mouse.click(point.x, point.y);
     await panel.waitForSelector('.attach-card');
     expect(await text(panel, '.target-label')).toBe('div.seller-name');
-    expect(await text(panel, '.attach-card')).toContain('display: block');
+    expect(await text(panel, '.target-dims')).toContain('block');
+    expect(await text(panel, '.attach-card-label')).toBe('div.seller-name');
     const findings = await text(panel, '.draft-findings');
     expect(findings).toContain('flex 항목');
     expect(findings).toContain('min-width: auto');
@@ -154,7 +155,7 @@ describe('요소 선택', () => {
 
   it('미리보기에서 글·요소를 빼면 전송 텍스트에서도 빠진다', async () => {
     await pick(panel, page, '.seller-name');
-    await panel.click('.attach-card-actions .chip-btn:nth-child(2)');
+    await panel.click('.attach-card-actions [data-action="preview"]');
     await panel.waitForSelector('.payload');
     expect(await text(panel, '.payload')).toContain('아주긴판매자이름');
     // 페이지 글 포함 끄기
@@ -215,7 +216,7 @@ describe('요소 선택', () => {
   it('선택한 요소가 사라지면 페이지에서 보기에서 찾을 수 없다고 알린다', async () => {
     await pick(panel, page, '#removable');
     await page.click('#remove-btn');
-    await panel.click('.attach-card-actions .chip-btn:nth-child(1)');
+    await panel.click('.attach-card-actions [data-action="view"]');
     await panel.waitForFunction(() => document.querySelector('.toasts')?.textContent?.includes('더 이상 페이지에 없습니다'), { timeout: 5000 });
     expect(await text(panel, '.live')).toContain('요소가 사라짐');
   });
@@ -224,7 +225,7 @@ describe('요소 선택', () => {
     await pick(panel, page, '.ok-title');
     await page.goto(`${env.origin}/?moved=1`);
     await panel.waitForFunction(() => document.querySelector('.live')?.textContent?.includes('페이지 이동됨'), { timeout: 5000 });
-    await panel.click('.attach-card-actions .chip-btn:nth-child(1)');
+    await panel.click('.attach-card-actions [data-action="view"]');
     await panel.waitForFunction(() => document.querySelector('.toasts')?.textContent?.includes('찾을 수 없습니다'), { timeout: 5000 });
   });
 
@@ -238,7 +239,7 @@ describe('요소 선택', () => {
     await other.goto(`http://127.0.0.1:${new URL(env.origin).port}/`);
     await other.bringToFront();
     await panel.waitForFunction(() => document.querySelector('.page-row')?.textContent?.includes('접근 권한이 없습니다'), { timeout: 5000 });
-    await panel.click('.composer-row .btn-secondary');
+    await panel.click('.pick-btn');
     await panel.waitForFunction(() => document.querySelector('.toasts')?.textContent?.includes('툴바의 NoodleLens 아이콘'), { timeout: 5000 });
     // 아이콘을 누르면 그 탭에 activeTab이 생긴다.
     await openPanel(env, other);

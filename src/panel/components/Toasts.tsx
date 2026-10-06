@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { CircleAlert, CircleCheck, Info, X } from 'lucide-react';
 import { dismissNotice, useStore } from '../store';
 
 /**
@@ -12,6 +12,13 @@ export function Toasts({ placement }: { placement: 'inline' | 'floating' }) {
     <div className={`toasts toasts-${placement}`} role="status" aria-live="polite">
       {notices.map((notice) => (
         <div key={notice.id} className={`toast toast-${notice.tone}`}>
+          {notice.tone === 'error' ? (
+            <CircleAlert size={15} className="toast-icon" aria-hidden="true" />
+          ) : notice.tone === 'success' ? (
+            <CircleCheck size={15} className="toast-icon" aria-hidden="true" />
+          ) : (
+            <Info size={15} className="toast-icon" aria-hidden="true" />
+          )}
           <span className="toast-text">{notice.text}</span>
           {notice.action && (
             <button

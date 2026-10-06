@@ -9,6 +9,7 @@ import { STATUS_LABEL, interruptText, timingText, usageText } from '../format';
 import { useStore } from '../store';
 import { FindingsCard } from './Findings';
 import { Markdown, type CitationTarget } from './Markdown';
+import { ProviderAvatar } from './ui';
 
 export const UserMessageView = memo(function UserMessageView({ message }: { message: UserMessage }) {
   const snapshot = useStore((s) => (message.snapshotId ? s.snapshots[message.snapshotId] : undefined));
@@ -23,7 +24,7 @@ export const UserMessageView = memo(function UserMessageView({ message }: { mess
             <code>{target.label}</code>
             <span className="attach-chip-meta">요소 {snapshot.elements.length - snapshot.exclusions.elementIds.length}개</span>
           </button>
-          <FindingsCard snapshot={snapshot} title="이 질문에 첨부한 기본 검사" />
+          <FindingsCard snapshot={snapshot} title="첨부한 기본 검사" />
         </div>
       )}
     </div>
@@ -129,7 +130,7 @@ export const AssistantMessageView = memo(function AssistantMessageView({
   return (
     <article className={`msg msg-assistant status-${message.status}`} aria-busy={active}>
       <header className="msg-head">
-        <span className={`provider-dot provider-${message.provider}`} aria-hidden="true" />
+        <ProviderAvatar provider={message.provider} />
         <span className="msg-model">{modelLabel(message.provider, message.model)}</span>
         {message.mock && <span className="badge badge-warn">모의 응답 · 실제 모델 아님</span>}
         {message.status !== 'complete' && <span className={`status-tag status-tag-${message.status}`}>{STATUS_LABEL[message.status]}</span>}

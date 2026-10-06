@@ -5,6 +5,7 @@ import { PROVIDERS, modelLabel } from '../../providers/registry';
 import { deleteAllConversations, deleteConversation, openConversation } from '../actions';
 import { originOf, relativeTime } from '../format';
 import { useStore } from '../store';
+import { ProviderAvatar } from './ui';
 
 export function HistoryView() {
   const conversations = useStore((s) => s.conversations);
@@ -46,7 +47,7 @@ export function HistoryView() {
               <button type="button" className="history-item" onClick={() => void openConversation(conversation.id)}>
                 <span className="history-title">{conversation.title}</span>
                 <span className="history-meta">
-                  <span className={`provider-dot provider-${conversation.provider}`} aria-hidden="true" />
+                  <ProviderAvatar provider={conversation.provider} />
                   {PROVIDERS[conversation.provider].shortLabel} · {modelLabel(conversation.provider, conversation.model)}
                   {conversation.pageUrl && ` · ${originOf(conversation.pageUrl)}`}
                 </span>

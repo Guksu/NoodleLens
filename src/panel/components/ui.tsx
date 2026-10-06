@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ProviderId } from '../../shared/conversation';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -35,6 +36,18 @@ export function Badge({ tone = 'neutral', children }: { tone?: 'neutral' | 'ok' 
   return <span className={`badge badge-${tone}`}>{children}</span>;
 }
 
+const AVATAR_LETTER: Record<ProviderId, string> = { anthropic: 'C', openai: 'G', mock: 'M' };
+
+/** 제공자 구분용 글자 아바타. 로고를 쓰지 않는다. */
+export function ProviderAvatar({ provider, warn = false }: { provider: ProviderId; warn?: boolean }) {
+  return (
+    <span className={`provider-avatar provider-${provider}`} aria-hidden="true">
+      {AVATAR_LETTER[provider]}
+      {warn && <span className="key-dot" />}
+    </span>
+  );
+}
+
 export function Switch({
   checked,
   onChange,
@@ -69,11 +82,11 @@ export function Switch({
 export function Logo({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" className="logo">
-      <rect width="32" height="32" rx="8" fill="var(--ink)" />
-      <circle cx="14" cy="14" r="7.5" fill="none" stroke="var(--brand)" strokeWidth="2.6" />
-      <path d="M19.6 19.6 26 26" stroke="var(--brand)" strokeWidth="3" strokeLinecap="round" />
+      <rect width="32" height="32" rx="9" fill="var(--logo-bg)" />
+      <circle cx="14" cy="14" r="7.2" fill="none" stroke="var(--brand)" strokeWidth="2.6" />
+      <path d="M19.5 19.5 25.5 25.5" stroke="var(--brand)" strokeWidth="3" strokeLinecap="round" />
       <path
-        d="M9.2 14.6c1.2-1.9 2.4-1.9 3.2 0s2 1.9 3.2 0 2-1.9 3.2 0"
+        d="M9.4 14.5c1.15-1.8 2.3-1.8 3.05 0s1.9 1.8 3.05 0 1.9-1.8 3.05 0"
         fill="none"
         stroke="var(--brand-light)"
         strokeWidth="1.6"

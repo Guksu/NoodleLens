@@ -1,10 +1,10 @@
-import { Check, ChevronDown, History, KeyRound, Plus, Settings } from 'lucide-react';
+import { Check, ChevronDown, History, KeyRound, Settings, SquarePen } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { ProviderId } from '../../shared/conversation';
 import { PROVIDERS, REAL_PROVIDERS, modelLabel } from '../../providers/registry';
 import { chooseModel, newAnalysis, providerReady, setView } from '../actions';
 import { shallowEqual, store, useStore } from '../store';
-import { IconButton, Logo } from './ui';
+import { IconButton, Logo, ProviderAvatar } from './ui';
 
 function useCurrentModel() {
   return useStore((s) => {
@@ -59,6 +59,7 @@ function ModelMenu({ onClose }: { onClose: () => void }) {
           <div key={provider} className="menu-group">
             <div className="menu-group-title">
               <span>{info.label}</span>
+              {otherProvider && <span className="menu-hint">새 분석으로 시작</span>}
               {!ready && (
                 <button
                   type="button"
@@ -68,10 +69,9 @@ function ModelMenu({ onClose }: { onClose: () => void }) {
                     setView('settings');
                   }}
                 >
-                  <KeyRound size={12} /> 키 필요
+                  <KeyRound size={11} aria-hidden="true" /> 키 입력
                 </button>
               )}
-              {otherProvider && <span className="menu-hint">새 분석으로 시작</span>}
             </div>
             {info.models.map((model) => {
               const selected = provider === current.provider && model.id === current.model;
@@ -84,18 +84,19 @@ function ModelMenu({ onClose }: { onClose: () => void }) {
                   className={`menu-item ${selected ? 'is-selected' : ''}`}
                   onClick={() => void pick(provider, model.id)}
                 >
+                  <ProviderAvatar provider={provider} />
                   <span className="menu-item-main">
                     <span className="menu-item-label">{model.label}</span>
                     <span className="menu-item-note">{model.note}</span>
                   </span>
-                  {selected && <Check size={14} aria-hidden="true" />}
+                  {selected && <Check size={14} className="menu-check" aria-hidden="true" />}
                 </button>
               );
             })}
           </div>
         );
       })}
-      <p className="menu-footnote">가격은 2026-10 공식 문서 기준(1M 토큰당 달러)입니다. 대화마다 제공자가 고정됩니다.</p>
+      <p className="menu-footnote">가격은 1M 토큰당 달러(2026-10 공식 문서). 대화마다 제공자가 고정됩니다.</p>
     </div>
   );
 }
@@ -117,12 +118,11 @@ export function Header() {
             aria-haspopup="menu"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
-            title="모델 선택"
+            title={ready ? '모델 선택' : '모델 선택 · API 키가 필요합니다'}
           >
-            <span className={`provider-dot provider-${current.provider}`} aria-hidden="true" />
+            <ProviderAvatar provider={current.provider} warn={!ready} />
             <span className="model-button-label">{modelLabel(current.provider, current.model)}</span>
-            {!ready && <KeyRound size={13} className="model-button-warn" aria-label="API 키 필요" />}
-            <ChevronDown size={14} aria-hidden="true" />
+            <ChevronDown size={14} className="model-button-chevron" aria-hidden="true" />
           </button>
           {open && <ModelMenu onClose={() => setOpen(false)} />}
         </div>
@@ -135,13 +135,13 @@ export function Header() {
             store.set((s) => ({ ...s, view: 'chat' }));
           }}
         >
-          <Plus size={17} />
+          <SquarePen size={16} />
         </IconButton>
         <IconButton label="기록" className={view === 'history' ? 'is-active' : ''} onClick={() => setView(view === 'history' ? 'chat' : 'history')}>
-          <History size={17} />
+          <History size={16} />
         </IconButton>
         <IconButton label="설정" className={view === 'settings' ? 'is-active' : ''} onClick={() => setView(view === 'settings' ? 'chat' : 'settings')}>
-          <Settings size={17} />
+          <Settings size={16} />
         </IconButton>
       </nav>
     </header>
