@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NoodleLens 데모 — 개발용 사례</title>
+    <link rel="stylesheet" href="./demo.css" />
+    <style>
+      /* 사례별 스타일. 원인 설명은 이 파일에 쓰지 않는다(수집 자료에 섞이지 않게). 정답은 eval/cases.json에 있다. */
+      .shop { width: 360px; }
+
+      /* A1 */
+      .promo-strip { width: 1200px; padding: 12px 16px; background: #fde68a; }
+
+      /* B1 */
+      .notice-title { width: 220px; overflow: hidden; text-overflow: ellipsis; }
+
+      /* B2 */
+      .tag-line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 140px; }
+
+      /* B3 */
+      .seller { display: flex; align-items: center; gap: 10px; width: 300px; padding: 10px; border: 1px solid #ccc; }
+      .seller-avatar { width: 40px; height: 40px; flex: none; border-radius: 50%; background: #93c5fd; }
+      .seller-body { flex: 1; }
+      .seller-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+
+      /* C1 */
+      .checkout-box { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; height: 120px; border: 1px dashed #999; }
+      .checkout { padding: 10px 24px; }
+
+      /* C2 */
+      .footer-cta { text-align: center; border: 1px dashed #999; padding: 10px 0; }
+      .footer-cta .pill-link { display: block; width: 160px; padding: 8px 0; background: #e0e7ff; }
+
+      /* D1 */
+      .gallery { width: 320px; border: 1px solid #ccc; padding: 8px; }
+
+      /* N1: 정상 */
+      .ok-title { width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* N2: 정상 */
+      .ok-row { display: flex; justify-content: center; align-items: center; height: 80px; border: 1px dashed #999; }
+
+      /* N3: 정상 */
+      .ok-media img { max-width: 100%; height: auto; display: block; }
+    </style>
+  </head>
+  <body>
+    <header class="demo-header">
+      <h1>NoodleLens 데모</h1>
+      <p>각 사례의 요소를 선택해 질문해 보세요. 정답은 저장소의 <code>eval/cases.json</code>에 있습니다.</p>
+    </header>
+
+    <main class="demo-grid">
+      <section class="case" id="case-a1">
+        <h2>A1</h2>
+        <div class="promo-strip">오늘만 무료 배송 · 지금 주문하면 내일 도착합니다</div>
+      </section>
+
+      <section class="case" id="case-b1">
+        <h2>B1</h2>
+        <div class="notice-title">서비스 점검 안내: 10월 12일 새벽 2시부터 4시까지 결제 기능을 사용할 수 없습니다</div>
+      </section>
+
+      <section class="case" id="case-b2">
+        <h2>B2</h2>
+        <p>태그: <span class="tag-line">프론트엔드, 레이아웃, 접근성, 성능, 타이포그래피, 반응형</span></p>
+      </section>
+
+      <section class="case" id="case-b3">
+        <h2>B3</h2>
+        <div class="seller">
+          <div class="seller-avatar"></div>
+          <div class="seller-body">
+            <div class="seller-name">아주긴판매자이름이들어가는공간입니다_공식스토어_서울본점</div>
+            <div class="seller-meta">평점 4.8 · 리뷰 1,204</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="case" id="case-c1">
+        <h2>C1</h2>
+        <div class="checkout-box">
+          <button class="checkout" type="button">결제하기</button>
+        </div>
+      </section>
+
+      <section class="case" id="case-c2">
+        <h2>C2</h2>
+        <div class="footer-cta">
+          <a class="pill-link" href="https://example.com/signup">회원가입하고 쿠폰 받기</a>
+        </div>
+      </section>
+
+      <section class="case" id="case-d1">
+        <h2>D1</h2>
+        <div class="gallery">
+          <img
+            class="hero-img"
+            alt="상품 큰 이미지"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Crect width='900' height='300' fill='%2393c5fd'/%3E%3Ctext x='450' y='160' font-size='40' text-anchor='middle'%3E900x300%3C/text%3E%3C/svg%3E"
+          />
+        </div>
+      </section>
+
+      <section class="case" id="case-n1">
+        <h2>N1</h2>
+        <div class="ok-title">정상적으로 말줄임되는 아주 긴 상품 이름 예시입니다</div>
+      </section>
+
+      <section class="case" id="case-n2">
+        <h2>N2</h2>
+        <div class="ok-row"><button type="button" class="ok-button">가운데 버튼</button></div>
+      </section>
+
+      <section class="case" id="case-n3">
+        <h2>N3</h2>
+        <div class="gallery ok-media">
+          <img
+            alt="정상 이미지"
+            width="900"
+            height="300"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Crect width='900' height='300' fill='%2386efac'/%3E%3C/svg%3E"
+          />
+        </div>
+      </section>
+
+      <section class="case" id="case-x">
+        <h2>기타 동작 확인</h2>
+        <p><a class="nav-link" href="https://example.com/">링크(선택 중 클릭해도 이동하면 안 됨)</a></p>
+        <form class="login" onsubmit="return false">
+          <input class="field" name="email" value="tester@example.com" />
+          <input class="field" name="password" type="password" value="hunter2-secret" />
+        </form>
+        <div class="removable" id="removable">이 요소는 아래 버튼으로 지울 수 있습니다</div>
+        <button type="button" id="remove-btn">위 요소 지우기</button>
+        <shadow-card></shadow-card>
+      </section>
+    </main>
+
+    <script>
+      document.getElementById('remove-btn').addEventListener('click', () => {
+        document.getElementById('removable')?.remove();
+      });
+      customElements.define(
+        'shadow-card',
+        class extends HTMLElement {
+          constructor() {
+            super();
+            const root = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.textContent = '.inner{display:flex;gap:8px;padding:8px;border:1px solid #c4b5fd}.inner span{white-space:nowrap}';
+            const inner = document.createElement('div');
+            inner.className = 'inner';
+            inner.innerHTML = '<span class="badge-a">shadow 안쪽 A</span><span class="badge-b">shadow 안쪽 B</span>';
+            root.append(style, inner);
+          }
+        },
+      );
+    </script>
+  </body>
+</html>

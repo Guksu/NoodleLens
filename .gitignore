@@ -11,3 +11,4 @@ playwright-report/
 eval/runs/
 *.pem
 *.crx
+!.env.example

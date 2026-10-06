@@ -1,0 +1,16 @@
+{
+  "$comment": "평가 도구 점검용 참조 수정안. 측정 함수가 올바른 수정을 '해결'로 판정하는지 확인한다(--reference). 모델 답변 평가에는 쓰지 않는다.",
+  "A1": ".promo-strip { width: auto; max-width: 100%; box-sizing: border-box; }",
+  "B1": ".notice-title { white-space: nowrap; }",
+  "B2": ".tag-line { display: inline-block; vertical-align: bottom; }",
+  "B3": ".seller-body { min-width: 0; }",
+  "C1": ".checkout-box { align-items: center; }",
+  "C2": ".footer-cta .pill-link { margin-inline: auto; }",
+  "D1": ".hero-img { max-width: 100%; height: auto; }",
+  "H1": ".article-main { min-width: 0; overflow-wrap: anywhere; }",
+  "H2": ".file-name { flex-shrink: 1; min-width: 0; }",
+  "H3": ".ribbon-card::after { right: 8px; }",
+  "H4": ".subscribe-area { text-align: center; }",
+  "H7": ".story img { aspect-ratio: 3 / 2; }",
+  "H8": ".promo-note { overflow: hidden; }"
+}
