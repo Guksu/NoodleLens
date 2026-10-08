@@ -29,7 +29,7 @@ function KeyCard({ provider }: { provider: 'openai' | 'anthropic' }) {
   };
 
   return (
-    <div className="card key-card">
+    <div className="key-card">
       <div className="card-head">
         <ProviderAvatar provider={provider} />
         <h3>{info.label}</h3>
@@ -38,7 +38,7 @@ function KeyCard({ provider }: { provider: 'openai' | 'anthropic' }) {
             저장됨 ····{status.hint} · {status.persistence === 'session' ? '브라우저 닫을 때까지' : '이 기기'}
           </span>
         ) : (
-          <span className="badge badge-neutral">키 없음</span>
+          <span className="badge">키 없음</span>
         )}
       </div>
       <form
@@ -69,7 +69,7 @@ function KeyCard({ provider }: { provider: 'openai' | 'anthropic' }) {
           </label>
         </fieldset>
         <div className="key-actions">
-          <button type="submit" className="btn btn-primary btn-sm" disabled={!value.trim() || saving}>
+          <button type="submit" className="btn btn-secondary btn-sm" disabled={!value.trim() || saving}>
             <KeyRound size={14} aria-hidden="true" />
             <span className="btn-label">저장</span>
           </button>

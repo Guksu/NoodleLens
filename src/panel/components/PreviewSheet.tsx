@@ -106,12 +106,15 @@ export function PreviewSheet({ snapshotId }: { snapshotId: string }) {
             {snapshot.elements.map((el) => (
               <li key={el.id} className={excluded.has(el.id) ? 'is-excluded' : ''}>
                 <label>
-                  <input
-                    type="checkbox"
-                    checked={!excluded.has(el.id)}
-                    disabled={!editable || el.id === snapshot.targetId}
-                    onChange={() => toggleElementExclusion(snapshot.id, el.id)}
-                  />
+                  {/* 이미 보낸 자료는 고칠 수 없으니 체크 상자를 그리지 않는다 — 비활성 컨트롤을 늘어놓지 않는다 */}
+                  {editable && (
+                    <input
+                      type="checkbox"
+                      checked={!excluded.has(el.id)}
+                      disabled={el.id === snapshot.targetId}
+                      onChange={() => toggleElementExclusion(snapshot.id, el.id)}
+                    />
+                  )}
                   {/* layout-audit-ignore: nested-card — E번호는 상자가 아니라 페이지 요소를 가리키는 배지다 */}
                   <span className="el-id">{el.id}</span>
                   <span className="element-role">

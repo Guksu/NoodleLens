@@ -5,7 +5,6 @@ import { HistoryView } from './components/HistoryView';
 import { MessageList } from './components/MessageList';
 import { PreviewSheet } from './components/PreviewSheet';
 import { SettingsView } from './components/SettingsView';
-import { TargetBar } from './components/TargetBar';
 import { Toasts } from './components/Toasts';
 import { useStore } from './store';
 
@@ -32,7 +31,6 @@ export function App() {
       <Header />
       {view === 'chat' && (
         <>
-          <TargetBar />
           <MessageList />
           <Composer />
         </>

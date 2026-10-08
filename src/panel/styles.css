@@ -1,8 +1,9 @@
 /* NoodleLens side panel
    한 문장: "페이지의 그 요소를 정확히 가리키고, 측정값으로 차분하게 말하는 개발자 도구".
+   - 범용 AI 채팅 화면의 뼈대: 머리 한 줄 → 대화 → 아래 입력창 하나. 지금 대상(페이지·요소)은 입력창 맨 위 한 곳에만 둔다.
    - 면(배경 단계)과 간격으로 묶고, 테두리는 입력창·팝오버·시트에만 쓴다. 상자는 한 겹만.
-   - 색은 중립 회색 + 잉크(주요 동작) 하나. amber는 '페이지 요소를 가리키는 표시'(E번호, 첨부, 페이지 강조)에만 쓴다.
-   - 상태색(빨강·주황·초록)은 검사 등급과 오류에만 쓴다.
+   - 색은 무채색 + 잉크(보내기·주 버튼) + 오류 빨강뿐이다. 주의·정보·완료는 글자와 아이콘 모양으로 구분한다.
+     로고의 노랑은 브랜드 표시라 로고 그림에만 쓴다(패널 UI에는 쓰지 않는다).
    - 값은 아래 토큰에서만 고른다(suta layout·motion principles를 360~420px 사이드 패널에 맞춤). */
 
 :root {
@@ -49,11 +50,11 @@
   --press-scale: 0.96;
   --press-release: 220ms; /* 누름은 60ms로 즉각, 복귀는 여유 있게 — 비대칭이어야 굼뜨지 않다 */
 
-  /* 색 */
-  --bg: #fafaf9;
+  /* 색 — 무채색 단계 + 잉크(주 행동) + 오류 빨강. 옅은 색 바탕 짝(-bg)을 두지 않는다 */
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f3f3f1;
-  --surface-3: #e9e9e6;
+  --surface-2: #f3f3f1; /* 내 말풍선·입력 채움·코드 */
+  --surface-3: #e9e9e6; /* 눌린·켜진 상태 */
   --hover: rgba(24, 25, 29, 0.05);
   --press: rgba(24, 25, 29, 0.09);
   --line: #ebebe7;
@@ -63,21 +64,12 @@
   --text-3: #74757c;
   --ink: #18191d;
   --ink-text: #ffffff;
-  --logo-bg: #18191d;
-  --brand: #f2b544;
-  --brand-light: #fff4dc;
-  --pointer: #9a6100;
-  --pointer-bg: #fcf1dc;
-  --pointer-line: #f0d7a5;
   --danger: #cc3d2a;
-  --danger-bg: #fdecea;
-  --warn: #c05f08;
-  --warn-bg: #fdf0e3;
-  --ok: #23854a;
-  --ok-bg: #e7f4eb;
-  --info: #3a62cf;
-  --info-bg: #ebf0fc;
-  --focus: #3a62cf;
+  --focus: #1b1c20;
+  /* 로고 그림 전용 — 패널 UI에 쓰지 않는다 */
+  --logo-bg: #18191d;
+  --logo-mark: #f2b544; /* layout-audit-ignore: tinted-surface·hue-count — 브랜드 로고 그림의 색 */
+  --logo-wave: #fff4dc; /* layout-audit-ignore: tinted-surface·hue-count — 브랜드 로고 그림의 색 */
   --shadow-sm: 0 1px 2px rgba(16, 17, 20, 0.06);
   --shadow: 0 10px 30px rgba(16, 17, 20, 0.12), 0 2px 6px rgba(16, 17, 20, 0.06);
   --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -88,30 +80,20 @@
   :root {
     --bg: #161719;
     --surface: #1d1e21;
-    --surface-2: #252629;
-    --surface-3: #2e2f33;
+    --surface-2: #26272a;
+    --surface-3: #303135;
     --hover: rgba(255, 255, 255, 0.06);
     --press: rgba(255, 255, 255, 0.1);
     --line: #2a2b2f;
     --line-strong: #393a3f;
     --text: #ececee;
     --text-2: #a8a9b0;
-    --text-3: #81828a;
+    --text-3: #8b8c93;
     --ink: #f0f0f1;
     --ink-text: #161719;
-    --logo-bg: #26272b;
-    --pointer: #f2bd5c;
-    --pointer-bg: #33281a;
-    --pointer-line: #57431f;
     --danger: #f2796b;
-    --danger-bg: #3a2120;
-    --warn: #f19a4b;
-    --warn-bg: #3a2919;
-    --ok: #5cc68b;
-    --ok-bg: #1a3324;
-    --info: #86a6ff;
-    --info-bg: #1e2a45;
-    --focus: #86a6ff;
+    --focus: #ececee;
+    --logo-bg: #26272b;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
   }
@@ -260,11 +242,12 @@ kbd {
 }
 
 .btn-secondary {
-  background: var(--surface-2);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--surface-3);
+  background: var(--hover);
 }
 
 .btn-ghost {
@@ -278,12 +261,12 @@ kbd {
 }
 
 .btn-danger {
-  background: var(--danger-bg);
+  background: transparent;
   color: var(--danger);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--danger) 16%, var(--danger-bg));
+  background: var(--hover);
 }
 
 .btn:disabled {
@@ -339,8 +322,9 @@ kbd {
   height: var(--control-sm);
   padding: 0 var(--space-3);
   border: 0;
-  border-radius: var(--radius-full);
-  background: var(--surface-2);
+  border-radius: var(--radius-control);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
   color: var(--text);
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
@@ -348,7 +332,7 @@ kbd {
 }
 
 .chip-btn:hover:not(:disabled) {
-  background: var(--surface-3);
+  background: var(--hover);
 }
 
 .chip-btn:disabled {
@@ -362,15 +346,17 @@ kbd {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--info);
+  color: var(--text);
   font-size: inherit;
   font-weight: var(--weight-medium);
   white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
 }
 
 .link-btn:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: currentColor;
 }
 
 /* 상태 변화(색·불투명도)는 instant, 누름은 press-feedback의 비대칭 타이밍 */
@@ -402,14 +388,13 @@ kbd {
   transition-duration: 60ms;
 }
 
+/* 상태 표시는 알약이 아니라 글자다 — 색은 오류만 빨강 */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   max-width: 100%;
-  height: 20px;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-full);
+  color: var(--text-3);
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
   white-space: nowrap;
@@ -417,71 +402,26 @@ kbd {
   text-overflow: ellipsis;
 }
 
-.badge-neutral {
-  background: var(--surface-2);
+.badge-ok {
   color: var(--text-2);
 }
 
-.badge-ok {
-  background: var(--ok-bg);
-  color: var(--ok);
-}
-
-.badge-warn {
-  background: var(--warn-bg);
-  color: var(--warn);
-}
-
 .badge-danger {
-  background: var(--danger-bg);
   color: var(--danger);
 }
 
-.badge-info {
-  background: var(--info-bg);
-  color: var(--info);
-}
-
-.badge-accent {
-  background: var(--pointer-bg);
-  color: var(--pointer);
-}
-
-/* 제공자 글자 아바타 */
+/* 제공자 글자 아바타 — 제공자마다 색을 나누지 않는다. 이름 글자로 구분한다 */
 .provider-avatar {
-  position: relative;
   display: inline-grid;
   place-items: center;
   width: 20px;
   height: 20px;
   flex: none;
   border-radius: var(--radius-control);
-  color: #fff;
+  background: var(--surface-2);
+  color: var(--text-2);
   font: var(--weight-semibold) var(--text-caption) / 1 var(--font);
   letter-spacing: 0;
-}
-
-.provider-anthropic {
-  background: #c0673f;
-}
-
-.provider-openai {
-  background: #1f8466;
-}
-
-.provider-mock {
-  background: var(--text-3);
-}
-
-.key-dot {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--bg);
-  border-radius: 50%;
-  background: var(--warn);
 }
 
 /* 페이지 요소를 가리키는 표시(E번호) */
@@ -494,8 +434,8 @@ kbd {
   flex: none;
   border: 0;
   border-radius: var(--radius-control);
-  background: var(--pointer-bg);
-  color: var(--pointer);
+  background: var(--surface-2);
+  color: var(--text-2);
   font: var(--weight-semibold) var(--text-caption) / 1 var(--mono);
   letter-spacing: 0;
 }
@@ -510,12 +450,12 @@ button.cite {
 }
 
 button.cite:hover {
-  box-shadow: inset 0 0 0 1px var(--pointer-line);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
 }
 
 .cite.is-unknown {
-  background: var(--warn-bg);
-  color: var(--warn);
+  background: transparent;
+  color: var(--danger);
   text-decoration: underline dotted;
   text-underline-offset: 2px;
   cursor: help;
@@ -660,11 +600,13 @@ button.cite:hover {
   height: 20px;
   padding: 0 var(--space-2);
   border: 0;
-  border-radius: var(--radius-full);
-  background: var(--warn-bg);
-  color: var(--warn);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .menu-item {
@@ -720,16 +662,8 @@ button.cite:hover {
   line-height: 1.5;
 }
 
-/* ───────── 대상 표시줄 ───────── */
-
-.context {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: 0 var(--space-2) var(--space-3) var(--page-inline);
-  border-bottom: 1px solid var(--line);
-}
+/* ───────── 지금 대상(입력창 맨 위 한 줄) ─────────
+   범용 채팅 화면처럼 머리 아래에 정보 줄을 쌓지 않는다. 페이지·대상·첨부는 입력창 안 이 자리 하나에만 있다. */
 
 .page-row {
   display: flex;
@@ -745,12 +679,8 @@ button.cite:hover {
 }
 
 .page-row.is-muted {
-  align-items: flex-start;
+  flex-wrap: wrap;
   color: var(--text-2);
-}
-
-.page-row.is-muted svg {
-  margin-top: var(--space-1);
 }
 
 .page-title {
@@ -758,7 +688,6 @@ button.cite:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text-2);
 }
 
 .page-row.is-muted .page-title {
@@ -778,13 +707,14 @@ button.cite:hover {
   margin-right: var(--space-1);
 }
 
-/* 선택자가 이 줄의 1순위 — 가장 굵고 진하게, 크기·display는 둘째 줄에 옅게 */
+/* 보낸 뒤의 대상 — 첨부 줄과 같은 모양(선택자 한 줄 + 옅은 메타 한 줄) */
 .target-row {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  margin-top: var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--line);
 }
 
 .target-text {
@@ -794,21 +724,13 @@ button.cite:hover {
   min-width: 0;
 }
 
-.target-line {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.target-label {
-  min-width: 0;
+.target-row .target-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--text-body);
+  color: var(--text);
+  font-size: var(--text-caption);
   font-weight: var(--weight-semibold);
-  line-height: 1.4;
 }
 
 .target-row.is-stale .target-label {
@@ -817,35 +739,31 @@ button.cite:hover {
   text-decoration-color: var(--line-strong);
 }
 
+.target-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--text-3);
+  font-size: var(--text-caption);
+}
+
 .target-dims {
   overflow: hidden;
-  color: var(--text-3);
-  font: var(--text-caption) / 1.5 var(--mono);
-  letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* 끊겼을 때만 보이는 상태 글자 — 색을 따로 두지 않고 진한 글자로 */
 .live {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
   flex: none;
-  font-size: var(--text-caption);
-  font-weight: var(--weight-medium);
-  color: var(--warn);
-}
-
-.live-connected {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 3px var(--ok-bg);
+  color: var(--text);
+  font-weight: var(--weight-semibold);
 }
 
 .live-checking {
   color: var(--text-3);
+  font-weight: var(--weight-regular);
 }
 
 .context-actions {
@@ -853,16 +771,6 @@ button.cite:hover {
   align-items: center;
   margin-left: auto;
   flex: none;
-}
-
-.target-warning {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
-  margin: 0;
-  color: var(--warn);
-  font-size: var(--text-caption);
 }
 
 /* ───────── 대화 ───────── */
@@ -885,6 +793,7 @@ button.cite:hover {
   flex-direction: column;
   gap: var(--space-6);
   min-width: 0;
+  min-height: 100%;
   padding: var(--space-4) var(--page-inline) var(--space-6);
 }
 
@@ -908,73 +817,37 @@ button.cite:hover {
   animation: fade-in var(--motion-duration-fast) var(--motion-ease-out);
 }
 
-/* 빈 상태 — 로고 → 제목 한 줄 → 설명 → 단계 → 주 버튼 하나 */
+/* 빈 상태 — 인사 한 줄 + 짧은 설명. 버튼·안내 상자를 두지 않는다(입력창이 맡는다) */
+/* 인사는 입력창 바로 위에 둔다 — 빈 대화 영역의 아래쪽에 붙여 눈이 입력창으로 이어진다 */
 .empty-guide {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-4) 0 var(--space-2);
+  gap: var(--space-2);
+  margin-top: auto;
+  padding: var(--space-8) 0 var(--space-2);
   color: var(--text-2);
 }
 
 .empty-guide h2 {
-  margin: var(--space-1) 0 0;
+  margin: 0 0 var(--space-1);
   color: var(--text);
   font-size: var(--text-title);
   font-weight: var(--weight-semibold);
   line-height: 1.3;
-  letter-spacing: -0.02em;
 }
 
 .empty-lead {
   margin: 0;
 }
 
-.empty-steps {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin: var(--space-2) 0 var(--space-1);
-  padding: 0;
-  list-style: none;
-}
-
-.empty-steps li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
-.empty-steps strong {
+.empty-lead strong {
   color: var(--text);
   font-weight: var(--weight-semibold);
 }
 
-.step-num {
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--surface-3);
-  color: var(--text-2);
-  font-size: var(--text-caption);
-  font-weight: var(--weight-semibold);
-}
-
-.empty-cta {
-  height: var(--control-lg);
-  margin-top: var(--space-1);
-}
-
-.empty-note {
-  margin: var(--space-1) 0 0;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-control);
-  background: var(--surface-2);
+.empty-keys {
+  margin: 0;
+  color: var(--text-3);
   font-size: var(--text-caption);
 }
 
@@ -993,7 +866,7 @@ button.cite:hover {
   max-width: 88%;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-card);
-  background: var(--surface-3);
+  background: var(--surface-2);
   color: var(--text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -1052,29 +925,12 @@ button.cite:hover {
 }
 
 .status-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-full);
+  color: var(--text-3);
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
 }
 
-.status-tag-pending,
-.status-tag-streaming {
-  background: var(--info-bg);
-  color: var(--info);
-}
-
-.status-tag-cancelled,
-.status-tag-interrupted {
-  background: var(--warn-bg);
-  color: var(--warn);
-}
-
 .status-tag-error {
-  background: var(--danger-bg);
   color: var(--danger);
 }
 
@@ -1123,36 +979,20 @@ button.cite:hover {
 .msg-notice {
   display: flex;
   gap: var(--space-2);
-  padding: var(--space-3);
-  border-radius: var(--radius-control);
 }
 
 .msg-notice > svg {
   flex: none;
   margin-top: var(--space-1);
+  color: var(--text-3);
 }
 
 .msg-notice p {
   margin: 0 0 var(--space-1);
 }
 
-.notice-cancelled,
-.notice-interrupted {
-  background: var(--warn-bg);
-  color: var(--text);
-}
-
-.notice-cancelled > svg,
-.notice-interrupted > svg {
-  color: var(--warn);
-}
-
-.notice-error {
-  background: var(--danger-bg);
-  color: var(--text);
-}
-
-.notice-error > svg {
+.notice-error > svg,
+.notice-error .msg-notice-body > p:first-child {
   color: var(--danger);
 }
 
@@ -1166,16 +1006,27 @@ button.cite:hover {
   font-size: var(--text-caption);
 }
 
+/* 다시 시도·설정 열기는 글자 버튼 — 오류 자리에 흰 알약을 얹지 않는다 */
 .msg-notice-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
+  gap: var(--space-4);
+  margin-top: var(--space-1);
 }
 
 .msg-notice-actions .chip-btn {
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+  height: auto;
+  padding: 0;
+  box-shadow: none;
+  color: var(--text);
+  font-size: var(--text-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.msg-notice-actions .chip-btn:hover:not(:disabled) {
+  background: none;
+  color: var(--text-2);
 }
 
 .msg-foot {
@@ -1194,7 +1045,7 @@ button.cite:hover {
 }
 
 .cite-check.has-unknown {
-  color: var(--warn);
+  color: var(--text-2);
 }
 
 .msg-action {
@@ -1303,7 +1154,9 @@ button.cite:hover {
 }
 
 .markdown a {
-  color: var(--info);
+  color: var(--text);
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
 }
 
 .markdown hr {
@@ -1498,12 +1351,13 @@ button.cite:hover {
 
 .sev-hint::before,
 .sev-hint .dot {
-  background: var(--warn);
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--text-2);
 }
 
 .sev-ok::before,
 .sev-ok .dot {
-  background: var(--ok);
+  background: var(--line-strong);
 }
 
 .sev-info .dot {
@@ -1661,18 +1515,19 @@ button.cite:hover {
   padding: 0 var(--space-3);
   border: 0;
   border-radius: var(--radius-full);
-  background: var(--surface-2);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
   color: var(--text-2);
   font-size: var(--text-caption);
   white-space: nowrap;
 }
 
 .example-chip:hover {
-  background: var(--surface-3);
+  background: var(--hover);
   color: var(--text);
 }
 
-/* 입력 상자가 이 화면의 1순위 — 화면에서 유일하게 테두리·그림자를 함께 가진 면 */
+/* 입력 상자가 이 화면의 1순위 — 지금 대상(페이지·요소·첨부)도 이 상자 맨 위 한 곳에만 있다 */
 .composer-box {
   display: flex;
   flex-direction: column;
@@ -1692,8 +1547,7 @@ button.cite:hover {
 }
 
 .composer-box.is-picking {
-  border-color: var(--pointer-line);
-  box-shadow: 0 0 0 3px var(--pointer-bg);
+  border-color: var(--text-3);
 }
 
 /* 첨부 줄 — 상자 안에 또 상자를 두지 않고 선 한 줄로 질문 입력과 나눈다 */
@@ -1708,7 +1562,7 @@ button.cite:hover {
 
 .attach-row-icon {
   flex: none;
-  color: var(--pointer);
+  color: var(--text-3);
 }
 
 .attach-row-text {
@@ -1746,8 +1600,8 @@ button.cite:hover {
   gap: var(--space-2);
   min-height: var(--control-sm);
   padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--pointer-line);
-  color: var(--pointer);
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
 }
@@ -1768,7 +1622,7 @@ button.cite:hover {
   height: 8px;
   flex: none;
   border-radius: 50%;
-  background: var(--brand);
+  background: var(--ink);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -1811,20 +1665,19 @@ button.cite:hover {
   height: var(--control-md);
   padding: 0 var(--space-3) 0 var(--space-2);
   border: 0;
-  border-radius: var(--radius-full);
-  background: var(--surface-2);
+  border-radius: var(--radius-control);
+  background: transparent;
   color: var(--text);
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
 }
 
 .pick-btn:hover:not(:disabled) {
-  background: var(--surface-3);
+  background: var(--hover);
 }
 
 .pick-btn.is-active {
-  background: var(--pointer-bg);
-  color: var(--pointer);
+  background: var(--surface-3);
 }
 
 .pick-btn:disabled {
@@ -1900,16 +1753,14 @@ button.cite:hover {
   color: var(--text-3);
 }
 
-.toast-error {
-  background: var(--danger-bg);
-}
+
 
 .toast-error .toast-icon {
   color: var(--danger);
 }
 
 .toast-success .toast-icon {
-  color: var(--ok);
+  color: var(--text);
 }
 
 .toast-text {
@@ -2263,9 +2114,16 @@ button.cite:hover {
   border-radius: var(--radius-control);
 }
 
-.history-list li:hover,
-.history-list li.is-active {
-  background: var(--surface-2);
+.history-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.history-list li:hover {
+  background: var(--hover);
+}
+
+.history-list li.is-active .history-title {
+  font-weight: var(--weight-semibold);
 }
 
 .history-item {
@@ -2332,14 +2190,14 @@ button.cite:hover {
   line-height: 1.6;
 }
 
-/* API 키는 설정의 1순위 — 제공자마다 독립 단위라 이것만 카드로 둔다.
-   나머지 구역은 구역 라벨과 간격으로만 나눈다 */
-.card {
-  margin-bottom: var(--space-2);
-  padding: var(--space-3);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-  box-shadow: 0 0 0 1px var(--line);
+/* API 키는 제공자마다 행 하나 — 상자 대신 선으로 나눈다 */
+.key-card {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.key-card:last-of-type {
+  border-bottom: 1px solid var(--line);
 }
 
 .card-head {
@@ -2431,7 +2289,7 @@ button.cite:hover {
 .privacy-card svg {
   flex: none;
   margin-top: 2px;
-  color: var(--ok);
+  color: var(--text-3);
 }
 
 .privacy-card ul {

@@ -54,7 +54,7 @@ export function HistoryView() {
                 <span className="history-meta">
                   {conversation.targetLabel && <code>{conversation.targetLabel}</code>}
                   <span>{relativeTime(conversation.updatedAt)}</span>
-                  {busyIds.split(',').includes(conversation.id) && <span className="badge badge-info">생성 중</span>}
+                  {busyIds.split(',').includes(conversation.id) && <span className="badge">생성 중</span>}
                 </span>
               </button>
               <button

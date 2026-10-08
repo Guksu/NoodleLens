@@ -132,7 +132,7 @@ export const AssistantMessageView = memo(function AssistantMessageView({
       <header className="msg-head">
         <ProviderAvatar provider={message.provider} />
         <span className="msg-model">{modelLabel(message.provider, message.model)}</span>
-        {message.mock && <span className="badge badge-warn">모의 응답 · 실제 모델 아님</span>}
+        {message.mock && <span className="badge">실제 모델 아님</span>}
         {message.status !== 'complete' && <span className={`status-tag status-tag-${message.status}`}>{STATUS_LABEL[message.status]}</span>}
         {message.stopReason === 'max_tokens' && <span className="status-tag status-tag-cancelled">출력 한도로 잘림</span>}
       </header>

@@ -45,12 +45,12 @@ describe('채팅 (모의 제공자)', () => {
     await waitForAnswer(panel, 'complete');
     const answer = await lastAnswer(panel);
     expect(answer.text).toContain('모의 응답입니다');
-    expect(await panel.$eval('.msg-assistant .badge-warn', (el) => el.textContent)).toContain('실제 모델 아님');
+    expect(await panel.$eval('.msg-assistant .msg-head .badge', (el) => el.textContent)).toContain('실제 모델 아님');
     // 수집 자료에 있는 식별자는 버튼, 없는 식별자는 경고 표시
     expect(await panel.$$eval('.msg-assistant button.cite', (els) => els.length)).toBeGreaterThan(0);
     expect(await panel.$eval('.msg-assistant .cite.is-unknown', (el) => el.textContent)).toBe('E999?');
     expect(answer.foot).toContain('수집 자료에 없는 식별자 1개(E999)');
-    // 보낸 뒤에는 입력창의 첨부가 비고, 위쪽 대상 표시줄은 그대로 남는다
+    // 보낸 뒤에는 입력창의 첨부가 비고, 입력창 맨 위 대상 줄은 그대로 남는다
     expect(await panel.$('.attach-row')).toBeNull();
     expect(await text(panel, '.target-label')).toBe('div.seller-name');
   });
