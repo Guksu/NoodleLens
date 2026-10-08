@@ -36,18 +36,18 @@ function AttachmentRow({ snapshot }: { snapshot: StoredSnapshot }) {
   );
   const excludedCount = snapshot.exclusions.elementIds.length;
   return (
-    <div className="attach-card" aria-label="이번 질문에 첨부되는 자료">
-      <Paperclip size={13} className="attach-card-icon" aria-hidden="true" />
-      <span className="attach-card-text">
-        <code className="attach-card-label" title={target.label}>
+    <div className="attach-row" aria-label="이번 질문에 첨부되는 자료">
+      <Paperclip size={13} className="attach-row-icon" aria-hidden="true" />
+      <span className="attach-row-text">
+        <code className="attach-row-label" title={target.label}>
           {target.label}
         </code>
-        <span className="attach-card-meta">
+        <span className="attach-row-meta">
           요소 {snapshot.elements.length - excludedCount}개 · 약 {formatTokens(tokens)} 토큰
           {excludedCount > 0 && ` · 제외 ${excludedCount}`}
         </span>
       </span>
-      <span className="attach-card-actions">
+      <span className="attach-row-actions">
         <IconButton label="페이지에서 보기" className="sm" data-action="view" onClick={() => void highlight(snapshot.id, snapshot.targetId)}>
           <Eye size={14} />
         </IconButton>

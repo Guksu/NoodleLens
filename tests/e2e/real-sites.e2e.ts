@@ -36,7 +36,7 @@ describe.skipIf(!process.env.NL_REAL_SITES)('실제 사이트', () => {
       await pick(panel, page, selector!);
       const elapsed = Date.now() - started;
       const label = await text(panel, '.target-label');
-      const meta = await text(panel, '.attach-card-meta');
+      const meta = await text(panel, '.attach-row-meta');
       const findings = await text(panel, '.draft-findings .findings-summary').catch(() => '');
       await page.waitForFunction(() => !document.querySelector('noodlelens-overlay'), { timeout: 6000 });
       const db = await readDb(panel);

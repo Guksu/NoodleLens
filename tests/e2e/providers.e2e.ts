@@ -199,7 +199,7 @@ describe('OpenAI (가로챈 응답)', () => {
     panel.once('dialog', (dialog) => void dialog.accept());
     await chooseModel(panel, 'GPT-6.1 Sol');
     // 대상 요소는 다시 수집해 첨부한다
-    await panel.waitForSelector('.attach-card', { timeout: 5000 });
+    await panel.waitForSelector('.attach-row', { timeout: 5000 });
     expect(await panel.$$('.bubble')).toHaveLength(0);
   });
 

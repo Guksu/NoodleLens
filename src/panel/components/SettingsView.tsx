@@ -124,7 +124,7 @@ export function SettingsView() {
       <KeyCard provider="openai" />
 
       <h3 className="section-title">사이트 접근</h3>
-      <div className="card">
+      <div className="settings-block">
         <p className="section-desc">
           기본적으로 툴바의 NoodleLens 아이콘을 누른 탭에서만 요소를 선택할 수 있습니다(activeTab). 탭마다 아이콘을 누르기 번거롭다면 모든 사이트 접근을 허용할 수 있습니다.
         </p>
@@ -138,7 +138,7 @@ export function SettingsView() {
       </div>
 
       <h3 className="section-title">데이터</h3>
-      <div className="card">
+      <div className="settings-block">
         <p className="section-desc">
           대화와 수집 자료(스냅샷)는 이 브라우저의 확장 프로그램 저장소에만 있습니다.
           {counts && ` 지금 대화 ${counts.conversations}개, 메시지 ${counts.messages}개, 스냅샷 ${counts.snapshots}개.`}
@@ -157,7 +157,7 @@ export function SettingsView() {
       </div>
 
       <h3 className="section-title">개발자</h3>
-      <div className="card">
+      <div className="settings-block">
         <Switch
           label="모의 응답 제공자 표시"
           description="네트워크 없이 화면을 확인하는 개발용 제공자입니다. 실제 모델 응답이 아닙니다."
@@ -168,7 +168,7 @@ export function SettingsView() {
       </div>
 
       <h3 className="section-title">개인정보</h3>
-      <div className="card privacy-card">
+      <div className="settings-block privacy-card">
         <ShieldCheck size={16} aria-hidden="true" />
         <ul>
           <li>입력창 값, 비밀번호, 쿠키, 편집 중인 글은 수집하지 않습니다.</li>

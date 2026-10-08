@@ -15,6 +15,7 @@ import {
   sleep,
   startPicking,
   text,
+  waitSheetSettled,
   windowListenerCount,
   type Env,
 } from './harness';
@@ -35,8 +36,9 @@ afterAll(async () => {
 });
 
 async function payload(): Promise<string> {
-  await panel.click('.attach-card-actions [data-action="preview"]');
+  await panel.click('.attach-row-actions [data-action="preview"]');
   await panel.waitForSelector('.payload');
+  await waitSheetSettled(panel);
   const value = await text(panel, '.payload');
   await panel.click('.sheet-head .icon-btn');
   await panel.waitForFunction(() => !document.querySelector('.sheet'));
@@ -57,10 +59,10 @@ describe('요소 선택', () => {
     await sleep(100);
     expect(await overlayPresent(page)).toBe(true);
     await page.mouse.click(point.x, point.y);
-    await panel.waitForSelector('.attach-card');
+    await panel.waitForSelector('.attach-row');
     expect(await text(panel, '.target-label')).toBe('div.seller-name');
     expect(await text(panel, '.target-dims')).toContain('block');
-    expect(await text(panel, '.attach-card-label')).toBe('div.seller-name');
+    expect(await text(panel, '.attach-row-label')).toBe('div.seller-name');
     const findings = await text(panel, '.draft-findings');
     expect(findings).toContain('flex 항목');
     expect(findings).toContain('min-width: auto');
@@ -155,8 +157,9 @@ describe('요소 선택', () => {
 
   it('미리보기에서 글·요소를 빼면 전송 텍스트에서도 빠진다', async () => {
     await pick(panel, page, '.seller-name');
-    await panel.click('.attach-card-actions [data-action="preview"]');
+    await panel.click('.attach-row-actions [data-action="preview"]');
     await panel.waitForSelector('.payload');
+    await waitSheetSettled(panel);
     expect(await text(panel, '.payload')).toContain('아주긴판매자이름');
     // 페이지 글 포함 끄기
     await panel.click('.sheet-toggles .switch-row:nth-child(1) .switch');
@@ -172,7 +175,19 @@ describe('요소 선택', () => {
     // 대상 요소는 뺄 수 없다
     expect(await panel.$eval('.element-list li:nth-child(1) input', (el) => (el as HTMLInputElement).disabled)).toBe(true);
     await panel.click('.sheet-head .icon-btn');
-    expect(await text(panel, '.attach-card-meta')).toContain('제외 1');
+    await panel.waitForFunction(() => !document.querySelector('.sheet'));
+    expect(await text(panel, '.attach-row-meta')).toContain('제외 1');
+  });
+
+  it('미리보기 시트는 Esc로 닫히고 포커스가 연 버튼으로 돌아온다', async () => {
+    await pick(panel, page, '.seller-name');
+    await panel.click('.attach-row-actions [data-action="preview"]');
+    await waitSheetSettled(panel);
+    // 모달이라 시트 밖(입력창)은 inert다
+    expect(await panel.evaluate(() => document.querySelector('.sheet')?.matches(':modal'))).toBe(true);
+    await panel.keyboard.press('Escape');
+    await panel.waitForFunction(() => !document.querySelector('.sheet'));
+    expect(await panel.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.action)).toBe('preview');
   });
 
   it('↑ 키로 부모 요소를 고를 수 있다', async () => {
@@ -216,7 +231,7 @@ describe('요소 선택', () => {
   it('선택한 요소가 사라지면 페이지에서 보기에서 찾을 수 없다고 알린다', async () => {
     await pick(panel, page, '#removable');
     await page.click('#remove-btn');
-    await panel.click('.attach-card-actions [data-action="view"]');
+    await panel.click('.attach-row-actions [data-action="view"]');
     await panel.waitForFunction(() => document.querySelector('.toasts')?.textContent?.includes('더 이상 페이지에 없습니다'), { timeout: 5000 });
     expect(await text(panel, '.live')).toContain('요소가 사라짐');
   });
@@ -225,7 +240,7 @@ describe('요소 선택', () => {
     await pick(panel, page, '.ok-title');
     await page.goto(`${env.origin}/?moved=1`);
     await panel.waitForFunction(() => document.querySelector('.live')?.textContent?.includes('페이지 이동됨'), { timeout: 5000 });
-    await panel.click('.attach-card-actions [data-action="view"]');
+    await panel.click('.attach-row-actions [data-action="view"]');
     await panel.waitForFunction(() => document.querySelector('.toasts')?.textContent?.includes('찾을 수 없습니다'), { timeout: 5000 });
   });
 

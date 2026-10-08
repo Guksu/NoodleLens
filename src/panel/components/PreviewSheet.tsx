@@ -1,14 +1,19 @@
 /**
  * '수집 내용' 미리보기. 모델에 보낼 텍스트를 그대로 보여 주고, 전송 전이면 항목을 뺄 수 있다.
+ * 네이티브 <dialog>.showModal()이라 포커스 가두기·배경 inert·Esc·닫은 뒤 포커스 복귀는 브라우저가 맡는다.
+ * 닫을 때만 퇴장 애니메이션(data-closing)이 끝난 뒤 close()하고 상태를 비운다.
  */
 import { Check, Copy, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { analyzeSnapshot } from '../../shared/analysis';
 import { estimateTokens, formatSnapshotForModel } from '../../shared/serialize';
 import type { ElementSnapshot } from '../../shared/snapshot';
 import { openPreview, toggleElementExclusion, updateExclusions } from '../actions';
 import { draftKey, useStore } from '../store';
 import { Switch } from './ui';
+
+/** animationend가 오지 않는 환경(애니메이션 꺼짐 등)에서 닫힘을 보장하는 상한 */
+const CLOSE_FALLBACK_MS = 500;
 
 const ROLE_TEXT: Record<ElementSnapshot['role'], string> = {
   target: '대상',
@@ -22,12 +27,44 @@ export function PreviewSheet({ snapshotId }: { snapshotId: string }) {
   const snapshot = useStore((s) => s.snapshots[snapshotId]);
   const editable = useStore((s) => s.drafts[draftKey(s)]?.attachment?.id === snapshotId);
   const [copied, setCopied] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const closing = useRef(false);
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && openPreview(null);
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+  const requestClose = useCallback(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || closing.current) return;
+    closing.current = true;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      dialog.removeEventListener('animationend', onEnd);
+      dialog.close();
+      openPreview(null);
+    };
+    // 안쪽 요소의 animationend도 올라오므로 dialog 자신의 것만 받는다.
+    const onEnd = (event: AnimationEvent) => event.target === dialog && finish();
+    dialog.setAttribute('data-closing', '');
+    dialog.addEventListener('animationend', onEnd);
+    window.setTimeout(finish, CLOSE_FALLBACK_MS);
   }, []);
+
+  const hasSnapshot = Boolean(snapshot);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (!dialog.open) dialog.showModal();
+    // Esc: 브라우저가 바로 닫기 전에 가로채 퇴장 애니메이션을 거친다.
+    const onCancel = (event: Event) => {
+      event.preventDefault();
+      requestClose();
+    };
+    dialog.addEventListener('cancel', onCancel);
+    return () => dialog.removeEventListener('cancel', onCancel);
+  }, [hasSnapshot, requestClose]);
+
+  // ::backdrop을 누르면 대상이 dialog 자신이다. 시트 안쪽을 누르면 자식이 대상이다.
+  const onBackdrop = (event: MouseEvent<HTMLDialogElement>) => event.target === event.currentTarget && requestClose();
 
   const payload = useMemo(
     () => (snapshot ? formatSnapshotForModel(snapshot, snapshot.exclusions, analyzeSnapshot(snapshot)) : ''),
@@ -39,11 +76,11 @@ export function PreviewSheet({ snapshotId }: { snapshotId: string }) {
   const ex = snapshot.exclusions;
 
   return (
-    <div className="sheet-backdrop" onMouseDown={(event) => event.target === event.currentTarget && openPreview(null)}>
-      <section className="sheet" role="dialog" aria-modal="true" aria-label="전송 자료 미리보기">
+    <dialog ref={dialogRef} className="sheet" aria-labelledby="sheet-title" onClick={onBackdrop}>
+      <div className="sheet-frame">
         <header className="sheet-head">
-          <h2>{editable ? '보낼 자료 미리보기' : '보낸 자료'}</h2>
-          <button type="button" className="icon-btn" aria-label="닫기" onClick={() => openPreview(null)}>
+          <h2 id="sheet-title">{editable ? '보낼 자료 미리보기' : '보낸 자료'}</h2>
+          <button type="button" className="icon-btn" aria-label="닫기" onClick={requestClose}>
             <X size={16} />
           </button>
         </header>
@@ -75,6 +112,7 @@ export function PreviewSheet({ snapshotId }: { snapshotId: string }) {
                     disabled={!editable || el.id === snapshot.targetId}
                     onChange={() => toggleElementExclusion(snapshot.id, el.id)}
                   />
+                  {/* layout-audit-ignore: nested-card — E번호는 상자가 아니라 페이지 요소를 가리키는 배지다 */}
                   <span className="el-id">{el.id}</span>
                   <span className="element-role">
                     {el.role === 'ancestor' && el.depth === 1 ? '부모' : ROLE_TEXT[el.role]}
@@ -108,9 +146,10 @@ export function PreviewSheet({ snapshotId }: { snapshotId: string }) {
               {copied ? <Check size={13} /> : <Copy size={13} />} 복사
             </button>
           </div>
+          {/* layout-audit-ignore: nested-card — 모델에 보내는 원문을 다른 글과 구분하는 코드 블록 면이다 */}
           <pre className="payload">{payload}</pre>
         </div>
-      </section>
-    </div>
+      </div>
+    </dialog>
   );
 }

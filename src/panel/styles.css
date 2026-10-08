@@ -1,12 +1,55 @@
 /* NoodleLens side panel
    한 문장: "페이지의 그 요소를 정확히 가리키고, 측정값으로 차분하게 말하는 개발자 도구".
-   - 면(배경 단계)과 간격으로 묶고, 테두리는 입력창·팝오버·시트에만 쓴다.
-   - 색은 중립 회색 + 잉크(주요 동작) 하나. amber는 '페이지 요소를 가리키는 표시'(E번호, 페이지 강조)에만 쓴다.
+   - 면(배경 단계)과 간격으로 묶고, 테두리는 입력창·팝오버·시트에만 쓴다. 상자는 한 겹만.
+   - 색은 중립 회색 + 잉크(주요 동작) 하나. amber는 '페이지 요소를 가리키는 표시'(E번호, 첨부, 페이지 강조)에만 쓴다.
    - 상태색(빨강·주황·초록)은 검사 등급과 오류에만 쓴다.
-   - 글꼴 Pretendard, 11~20px, 굵기 400·500·600. 측정값·선택자는 고정폭. */
+   - 값은 아래 토큰에서만 고른다(suta layout·motion principles를 360~420px 사이드 패널에 맞춤). */
 
 :root {
   color-scheme: light dark;
+
+  /* 간격 — 4px 격자. 묶음 안 8, 묶음 사이 24 */
+  --space-1: 4px; /* 아이콘과 글자 사이 */
+  --space-2: 8px; /* 묶음 안 */
+  --space-3: 12px; /* 행 안의 요소 사이, 상자 안쪽 여백 */
+  --space-4: 16px; /* 패널 좌우 여백 */
+  --space-6: 24px; /* 묶음 사이 — 메시지와 메시지 */
+  --space-8: 32px; /* 구역 사이 */
+  --page-inline: var(--space-4); /* 헤더·대상 표시줄·대화·입력이 같은 왼쪽 선에서 시작한다 */
+
+  /* 글자 — 역할로 4종. 12px 아래로 내리지 않는다 */
+  --text-caption: 12px; /* 메타·라벨·측정값·선택자 */
+  --text-body: 14px; /* 본문·답변·입력 */
+  --text-heading: 16px; /* 시트 제목 */
+  --text-title: 20px; /* 화면 제목(빈 화면·기록·설정·동의) */
+  --leading-body: 1.6;
+  --weight-regular: 400;
+  --weight-medium: 500; /* 버튼·목록 항목 이름 */
+  --weight-semibold: 600; /* 제목·선택자 — 영역마다 한 줄 */
+
+  /* 반경 — 역할로 3종 + 원형 */
+  --radius-control: 8px; /* 버튼·입력칸·칩·코드 */
+  --radius-card: 12px; /* 입력 상자·검사 카드·키 카드·메뉴 */
+  --radius-sheet: 20px; /* 하단 시트 */
+  --radius-full: 999px; /* 알약·원 */
+
+  /* 컨트롤 높이 — 마우스 기준 패널이라 모바일 44px 대신 28/32, 주 버튼만 40 */
+  --control-sm: 28px;
+  --control-md: 32px;
+  --control-lg: 40px;
+
+  /* 모션 — 무엇이 움직이는가로 고른다(suta motion-principles) */
+  --motion-duration-instant: 100ms; /* 색·불투명도 상태 변화 */
+  --motion-duration-fast: 150ms; /* 작은 요소(스위치 손잡이·화살표) */
+  --motion-duration-base: 250ms; /* 컴포넌트 전환(메뉴·알림·펼침) */
+  --motion-duration-slow: 350ms; /* 화면 크기의 이동(하단 시트) */
+  --motion-exit-ratio: 0.75; /* 퇴장 = 진입 × 0.75 */
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --press-scale: 0.96;
+  --press-release: 220ms; /* 누름은 60ms로 즉각, 복귀는 여유 있게 — 비대칭이어야 굼뜨지 않다 */
+
+  /* 색 */
   --bg: #fafaf9;
   --surface: #ffffff;
   --surface-2: #f3f3f1;
@@ -17,7 +60,7 @@
   --line-strong: #dcdcd7;
   --text: #1b1c20;
   --text-2: #5c5e66;
-  --text-3: #95969e;
+  --text-3: #74757c;
   --ink: #18191d;
   --ink-text: #ffffff;
   --logo-bg: #18191d;
@@ -28,7 +71,7 @@
   --pointer-line: #f0d7a5;
   --danger: #cc3d2a;
   --danger-bg: #fdecea;
-  --warn: #d46a0b;
+  --warn: #c05f08;
   --warn-bg: #fdf0e3;
   --ok: #23854a;
   --ok-bg: #e7f4eb;
@@ -37,13 +80,8 @@
   --focus: #3a62cf;
   --shadow-sm: 0 1px 2px rgba(16, 17, 20, 0.06);
   --shadow: 0 10px 30px rgba(16, 17, 20, 0.12), 0 2px 6px rgba(16, 17, 20, 0.06);
-  --r-xs: 5px;
-  --r-sm: 8px;
-  --r: 12px;
-  --r-lg: 16px;
   --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
-  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,7 +96,7 @@
     --line-strong: #393a3f;
     --text: #ececee;
     --text-2: #a8a9b0;
-    --text-3: #74757c;
+    --text-3: #81828a;
     --ink: #f0f0f1;
     --ink-text: #161719;
     --logo-bg: #26272b;
@@ -95,8 +133,9 @@ body,
 body {
   background: var(--bg);
   color: var(--text);
-  font: 400 13px/1.55 var(--font);
+  font: var(--weight-regular) var(--text-body) / var(--leading-body) var(--font);
   letter-spacing: -0.006em;
+  word-break: keep-all;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden;
@@ -119,10 +158,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* 키보드 사용자에게만 보이는 포커스 — outline은 요소의 둥근 모서리를 따른다 */
 :focus-visible {
   outline: 2px solid var(--focus);
-  outline-offset: 1px;
-  border-radius: 4px;
+  outline-offset: 2px;
 }
 
 code,
@@ -130,17 +169,18 @@ kbd,
 pre {
   font-family: var(--mono);
   letter-spacing: 0;
+  word-break: normal;
 }
 
 kbd {
   display: inline-block;
-  min-width: 18px;
-  padding: 0 4px;
-  border-radius: 4px;
+  min-width: 20px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-control);
   background: var(--surface-3);
   color: var(--text-2);
-  font-size: 11px;
-  line-height: 17px;
+  font-size: var(--text-caption);
+  line-height: 20px;
   text-align: center;
 }
 
@@ -175,12 +215,12 @@ kbd {
 }
 
 .app-error {
-  padding: 16px;
-  gap: 8px;
+  padding: var(--space-4);
+  gap: var(--space-2);
 }
 
 .app-error code {
-  font-size: 12px;
+  font-size: var(--text-caption);
   overflow-wrap: anywhere;
 }
 
@@ -190,25 +230,24 @@ kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-2);
   min-width: 0;
   border: 0;
-  border-radius: var(--r-sm);
-  font-weight: 500;
+  border-radius: var(--radius-control);
+  font-weight: var(--weight-medium);
   white-space: nowrap;
-  transition: background-color 120ms var(--ease), opacity 120ms var(--ease);
 }
 
 .btn-sm {
-  height: 28px;
-  padding: 0 10px;
-  font-size: 12px;
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
+  gap: var(--space-1);
+  font-size: var(--text-caption);
 }
 
 .btn-md {
-  height: 34px;
-  padding: 0 14px;
-  font-size: 13px;
+  height: var(--control-md);
+  padding: 0 var(--space-4);
 }
 
 .btn-primary {
@@ -260,21 +299,19 @@ kbd {
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: var(--control-md);
+  height: var(--control-md);
   flex: none;
   padding: 0;
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-2);
-  transition: background-color 120ms var(--ease), color 120ms var(--ease);
 }
 
 .icon-btn.sm {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: var(--control-sm);
+  height: var(--control-sm);
 }
 
 .icon-btn:hover:not(:disabled) {
@@ -298,17 +335,16 @@ kbd {
 .chip-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 26px;
-  padding: 0 10px;
+  gap: var(--space-1);
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-2);
   color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
   white-space: nowrap;
-  transition: background-color 120ms var(--ease);
 }
 
 .chip-btn:hover:not(:disabled) {
@@ -322,13 +358,13 @@ kbd {
 .link-btn {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-1);
   padding: 0;
   border: 0;
   background: none;
   color: var(--info);
   font-size: inherit;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   white-space: nowrap;
 }
 
@@ -337,16 +373,45 @@ kbd {
   text-underline-offset: 2px;
 }
 
+/* 상태 변화(색·불투명도)는 instant, 누름은 press-feedback의 비대칭 타이밍 */
+.btn,
+.icon-btn,
+.chip-btn,
+.example-chip,
+.pick-btn,
+.send-btn,
+.model-button,
+.menu-item,
+.finding-row,
+.history-item,
+.attach-chip,
+.toast-action,
+.toast-close,
+.msg-action,
+.code-copy,
+.superseded-toggle {
+  transition:
+    background-color var(--motion-duration-instant) var(--motion-ease-out),
+    color var(--motion-duration-instant) var(--motion-ease-out),
+    opacity var(--motion-duration-instant) var(--motion-ease-out),
+    transform var(--press-release) var(--motion-ease-out);
+}
+
+:is(.btn, .icon-btn, .chip-btn, .example-chip, .pick-btn, .send-btn, .toast-action):active:not(:disabled) {
+  transform: scale(var(--press-scale));
+  transition-duration: 60ms;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   max-width: 100%;
-  height: 18px;
-  padding: 0 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 500;
+  height: 20px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -387,12 +452,12 @@ kbd {
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex: none;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   color: #fff;
-  font: 700 10px/1 var(--font);
+  font: var(--weight-semibold) var(--text-caption) / 1 var(--font);
   letter-spacing: 0;
 }
 
@@ -410,10 +475,10 @@ kbd {
 
 .key-dot {
   position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 8px;
-  height: 8px;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
   border: 2px solid var(--bg);
   border-radius: 50%;
   background: var(--warn);
@@ -424,14 +489,14 @@ kbd {
 .cite {
   display: inline-flex;
   align-items: center;
-  height: 18px;
-  padding: 0 5px;
+  height: 20px;
+  padding: 0 var(--space-1);
   flex: none;
   border: 0;
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-control);
   background: var(--pointer-bg);
   color: var(--pointer);
-  font: 600 11px/1 var(--mono);
+  font: var(--weight-semibold) var(--text-caption) / 1 var(--mono);
   letter-spacing: 0;
 }
 
@@ -441,7 +506,7 @@ kbd {
 }
 
 button.cite {
-  transition: box-shadow 120ms var(--ease);
+  transition: box-shadow var(--motion-duration-instant) var(--motion-ease-out);
 }
 
 button.cite:hover {
@@ -468,15 +533,15 @@ button.cite:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  height: 46px;
-  padding: 0 6px 0 10px;
+  gap: var(--space-2);
+  height: 48px;
+  padding: 0 var(--space-2) 0 var(--page-inline);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -492,16 +557,14 @@ button.cite:hover {
 .model-button {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
   max-width: 100%;
-  height: 32px;
-  padding: 0 8px 0 7px;
+  height: var(--control-md);
+  padding: 0 var(--space-2);
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: transparent;
-  font-size: 13px;
-  font-weight: 600;
-  transition: background-color 120ms var(--ease);
+  font-weight: var(--weight-semibold);
 }
 
 .model-button:hover,
@@ -524,76 +587,94 @@ button.cite:hover {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
   flex: none;
 }
 
 .menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + var(--space-1));
   left: 0;
   z-index: 30;
-  width: min(300px, calc(100vw - 20px));
+  width: min(300px, calc(100vw - var(--space-6)));
   max-height: min(72vh, 500px);
   overflow-y: auto;
-  padding: 6px;
+  padding: var(--space-1);
   border: 1px solid var(--line);
-  border-radius: var(--r);
+  border-radius: var(--radius-card);
   background: var(--surface);
   box-shadow: var(--shadow);
-  animation: pop-in 140ms var(--ease);
+  animation: drop-in var(--motion-duration-base) var(--motion-ease-out);
 }
 
-@keyframes pop-in {
+@keyframes drop-in {
   from {
     opacity: 0;
     transform: translateY(-4px);
   }
 }
 
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 .menu-group + .menu-group {
-  margin-top: 6px;
-  padding-top: 6px;
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
   border-top: 1px solid var(--line);
 }
 
 .menu-group-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 8px 4px;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
   color: var(--text-3);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
 }
 
 .menu-hint {
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .menu-key-link {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-1);
   margin-left: auto;
-  height: 18px;
-  padding: 0 7px;
+  height: 20px;
+  padding: 0 var(--space-2);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--warn-bg);
   color: var(--warn);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-2);
   width: 100%;
-  padding: 7px 8px;
+  padding: var(--space-2);
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: transparent;
   text-align: left;
 }
@@ -601,6 +682,10 @@ button.cite:hover {
 .menu-item:hover,
 .menu-item:focus-visible {
   background: var(--hover);
+}
+
+.menu-item:focus-visible {
+  outline-offset: -2px;
 }
 
 .menu-item.is-selected {
@@ -615,12 +700,12 @@ button.cite:hover {
 }
 
 .menu-item-label {
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .menu-item-note {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 
 .menu-check {
@@ -629,10 +714,10 @@ button.cite:hover {
 }
 
 .menu-footnote {
-  margin: 6px 8px 2px;
+  margin: var(--space-2) var(--space-2) var(--space-1);
   color: var(--text-3);
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: var(--text-caption);
+  line-height: 1.5;
 }
 
 /* ───────── 대상 표시줄 ───────── */
@@ -641,18 +726,18 @@ button.cite:hover {
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 12px 9px;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) var(--space-3) var(--page-inline);
   border-bottom: 1px solid var(--line);
 }
 
 .page-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1);
   min-width: 0;
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 .page-row svg {
@@ -665,7 +750,7 @@ button.cite:hover {
 }
 
 .page-row.is-muted svg {
-  margin-top: 3px;
+  margin-top: var(--space-1);
 }
 
 .page-title {
@@ -690,21 +775,21 @@ button.cite:hover {
 
 .page-origin::before {
   content: '·';
-  margin-right: 6px;
+  margin-right: var(--space-1);
 }
 
-.target-card {
+/* 선택자가 이 줄의 1순위 — 가장 굵고 진하게, 크기·display는 둘째 줄에 옅게 */
+.target-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 0;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .target-text {
   display: flex;
   flex-direction: column;
-  gap: 1px;
   flex: 1;
   min-width: 0;
 }
@@ -712,7 +797,7 @@ button.cite:hover {
 .target-line {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -721,11 +806,12 @@ button.cite:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
 }
 
-.target-card.is-stale .target-label {
+.target-row.is-stale .target-label {
   color: var(--text-3);
   text-decoration: line-through;
   text-decoration-color: var(--line-strong);
@@ -734,7 +820,7 @@ button.cite:hover {
 .target-dims {
   overflow: hidden;
   color: var(--text-3);
-  font: 11px/1.4 var(--mono);
+  font: var(--text-caption) / 1.5 var(--mono);
   letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -743,16 +829,16 @@ button.cite:hover {
 .live {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   flex: none;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
   color: var(--warn);
 }
 
 .live-connected {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--ok);
   box-shadow: 0 0 0 3px var(--ok-bg);
@@ -765,7 +851,6 @@ button.cite:hover {
 .context-actions {
   display: flex;
   align-items: center;
-  gap: 1px;
   margin-left: auto;
   flex: none;
 }
@@ -774,10 +859,10 @@ button.cite:hover {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 6px;
+  gap: var(--space-1) var(--space-2);
   margin: 0;
   color: var(--warn);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 /* ───────── 대화 ───────── */
@@ -798,57 +883,59 @@ button.cite:hover {
 .messages-inner {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--space-6);
   min-width: 0;
-  padding: 14px 12px 20px;
+  padding: var(--space-4) var(--page-inline) var(--space-6);
 }
 
 .jump-latest {
   position: absolute;
-  bottom: 12px;
+  bottom: var(--space-3);
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 30px;
-  padding: 0 12px;
+  gap: var(--space-1);
+  height: var(--control-md);
+  padding: 0 var(--space-3);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface);
   box-shadow: var(--shadow);
   color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  animation: fade-in var(--motion-duration-fast) var(--motion-ease-out);
 }
 
+/* 빈 상태 — 로고 → 제목 한 줄 → 설명 → 단계 → 주 버튼 하나 */
 .empty-guide {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  padding: 18px 6px 8px;
+  gap: var(--space-3);
+  padding: var(--space-4) 0 var(--space-2);
   color: var(--text-2);
 }
 
 .empty-guide h2 {
-  margin: 6px 0 0;
+  margin: var(--space-1) 0 0;
   color: var(--text);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
   letter-spacing: -0.02em;
 }
 
 .empty-lead {
   margin: 0;
-  font-size: 13px;
 }
 
 .empty-steps {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  margin: 6px 0 4px;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-1);
   padding: 0;
   list-style: none;
 }
@@ -856,45 +943,45 @@ button.cite:hover {
 .empty-steps li {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  font-size: 12.5px;
+  gap: var(--space-2);
 }
 
 .empty-steps strong {
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .step-num {
   display: inline-grid;
   place-items: center;
-  width: 19px;
-  height: 19px;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
   flex: none;
   border-radius: 50%;
   background: var(--surface-3);
   color: var(--text-2);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
 }
 
 .empty-cta {
-  margin-top: 4px;
+  height: var(--control-lg);
+  margin-top: var(--space-1);
 }
 
 .empty-note {
-  margin: 4px 0 0;
-  padding: 9px 11px;
-  border-radius: var(--r-sm);
+  margin: var(--space-1) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: var(--text-caption);
 }
 
 .msg {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -904,8 +991,8 @@ button.cite:hover {
 
 .bubble {
   max-width: 88%;
-  padding: 8px 12px;
-  border-radius: 14px 14px 5px 14px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-card);
   background: var(--surface-3);
   color: var(--text);
   white-space: pre-wrap;
@@ -916,22 +1003,22 @@ button.cite:hover {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: var(--space-1);
   width: 100%;
 }
 
 .attach-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   max-width: 88%;
   height: 24px;
-  padding: 0 9px;
+  padding: 0 var(--space-2);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 .attach-chip:hover {
@@ -950,32 +1037,28 @@ button.cite:hover {
   flex: none;
 }
 
-.msg-assistant {
-  gap: 8px;
-}
-
 .msg-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 .msg-model {
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .status-tag {
   display: inline-flex;
   align-items: center;
-  height: 18px;
-  padding: 0 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 500;
+  height: 20px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
 }
 
 .status-tag-pending,
@@ -998,12 +1081,13 @@ button.cite:hover {
 .msg-waiting {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   color: var(--text-3);
-  font-size: 12.5px;
+  font-size: var(--text-caption);
 }
 
+/* 진행 표시라 시간에 비례하는 steps 반복을 쓴다. 동작 줄이기에서는 멈춘다 */
 .dots {
   width: 22px;
   height: 6px;
@@ -1022,10 +1106,10 @@ button.cite:hover {
 
 .cursor {
   display: inline-block;
-  width: 7px;
-  height: 14px;
+  width: 8px;
+  height: 16px;
   margin-top: -4px;
-  border-radius: 2px;
+  border-radius: var(--radius-full);
   background: var(--text-3);
   animation: blink 1s steps(2) infinite;
 }
@@ -1038,19 +1122,18 @@ button.cite:hover {
 
 .msg-notice {
   display: flex;
-  gap: 9px;
-  padding: 10px 12px;
-  border-radius: var(--r-sm);
-  font-size: 12.5px;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
 }
 
 .msg-notice > svg {
   flex: none;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .msg-notice p {
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-1);
 }
 
 .notice-cancelled,
@@ -1080,13 +1163,14 @@ button.cite:hover {
 
 .msg-notice-body .muted {
   color: var(--text-2);
+  font-size: var(--text-caption);
 }
 
 .msg-notice-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .msg-notice-actions .chip-btn {
@@ -1098,15 +1182,15 @@ button.cite:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 10px;
+  gap: var(--space-1) var(--space-3);
   color: var(--text-3);
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 
 .cite-check {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .cite-check.has-unknown {
@@ -1116,11 +1200,11 @@ button.cite:hover {
 .msg-action {
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: var(--control-sm);
+  height: var(--control-sm);
   margin-left: auto;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-3);
 }
@@ -1140,13 +1224,13 @@ button.cite:hover {
 
 .superseded-toggle {
   align-self: flex-start;
-  height: 26px;
-  padding: 0 10px;
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-2);
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 .superseded-toggle:hover {
@@ -1158,7 +1242,6 @@ button.cite:hover {
 .markdown {
   min-width: 0;
   overflow-wrap: anywhere;
-  font-size: 13px;
   line-height: 1.65;
 }
 
@@ -1174,29 +1257,25 @@ button.cite:hover {
 .markdown h2,
 .markdown h3,
 .markdown h4 {
-  margin: 16px 0 4px;
+  margin: var(--space-4) 0 var(--space-1);
   color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
   line-height: 1.4;
 }
 
 .markdown p {
-  margin: 4px 0;
+  margin: var(--space-2) 0;
 }
 
 .markdown ul,
 .markdown ol {
-  margin: 4px 0;
-  padding-left: 18px;
-}
-
-.markdown li {
-  padding-left: 2px;
+  margin: var(--space-2) 0;
+  padding-left: var(--space-6);
 }
 
 .markdown li + li {
-  margin-top: 3px;
+  margin-top: var(--space-1);
 }
 
 .markdown li::marker {
@@ -1204,21 +1283,21 @@ button.cite:hover {
 }
 
 .markdown strong {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .markdown code {
-  padding: 1px 5px;
-  border-radius: 5px;
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
   overflow-wrap: anywhere;
 }
 
 .markdown blockquote {
-  margin: 6px 0;
-  padding: 7px 11px;
-  border-radius: var(--r-sm);
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
   color: var(--text-2);
 }
@@ -1234,17 +1313,17 @@ button.cite:hover {
 
 .code-block {
   position: relative;
-  margin: 8px 0;
+  margin: var(--space-2) 0;
 }
 
 .code-block pre {
   margin: 0;
   max-width: 100%;
-  padding: 11px 12px;
+  padding: var(--space-3);
   overflow-x: auto;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
   line-height: 1.55;
 }
 
@@ -1257,19 +1336,18 @@ button.cite:hover {
 
 .code-copy {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: var(--space-2);
+  right: var(--space-2);
   display: grid;
   place-items: center;
   width: 24px;
   height: 24px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--text-2);
   box-shadow: var(--shadow-sm);
   opacity: 0;
-  transition: opacity 120ms var(--ease);
 }
 
 .code-block:hover .code-copy,
@@ -1279,18 +1357,18 @@ button.cite:hover {
 
 .table-scroll {
   max-width: 100%;
-  margin: 8px 0;
+  margin: var(--space-2) 0;
   overflow-x: auto;
 }
 
 .table-scroll table {
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 .table-scroll th,
 .table-scroll td {
-  padding: 5px 8px;
+  padding: var(--space-1) var(--space-2);
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
@@ -1298,42 +1376,64 @@ button.cite:hover {
 
 .table-scroll th {
   color: var(--text-2);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .md-image-placeholder {
   color: var(--text-3);
 }
 
+/* ───────── 펼침(accordion) ─────────
+   높이는 grid-template-rows 0fr↔1fr로 연다 — height를 움직이지 않고 측정 코드도 없다.
+   닫히면 visibility로 숨겨 안쪽 버튼이 Tab 순서에서 빠진다. */
+
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--motion-duration-base) var(--motion-ease-out),
+    visibility 0s var(--motion-duration-base);
+}
+
+.collapse[data-open='true'] {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows var(--motion-duration-base) var(--motion-ease-out),
+    visibility 0s;
+}
+
+/* min-height: 0이 있어야 0fr에서 실제로 줄어든다 */
+.collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 /* ───────── 기본 검사 ───────── */
 
-.findings {
-  width: 100%;
-  border-radius: var(--r);
+/* 첨부 전 기본 검사는 대화 영역의 유일한 독립 단위라 카드 한 겹으로 둔다 */
+.draft-findings .findings {
+  border-radius: var(--radius-card);
   background: var(--surface);
   box-shadow: 0 0 0 1px var(--line);
 }
 
-.msg-attachment .findings {
-  background: transparent;
-  box-shadow: none;
+.findings {
+  width: 100%;
 }
 
 .findings-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
-  padding: 9px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 0;
-  border-radius: var(--r);
+  border-radius: var(--radius-card);
   background: transparent;
   text-align: left;
-}
-
-.msg-attachment .findings-head {
-  justify-content: flex-end;
-  padding: 2px 6px;
+  transition: background-color var(--motion-duration-instant) var(--motion-ease-out);
 }
 
 .findings-head:hover {
@@ -1341,35 +1441,51 @@ button.cite:hover {
 }
 
 .findings-title {
-  font-size: 12.5px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
+}
+
+/* 보낸 질문 아래 기본 검사 — 오른쪽 작은 토글, 펼치면 상자 없이 행만 */
+.msg-attachment .findings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.msg-attachment .findings-head {
+  width: auto;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
 }
 
 .msg-attachment .findings-title {
   color: var(--text-3);
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+}
+
+.msg-attachment .collapse {
+  align-self: stretch;
 }
 
 .findings-summary {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .sev {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   color: var(--text-2);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 .sev::before,
 .dot {
   content: '';
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   flex: none;
   border-radius: 50%;
   background: var(--text-3);
@@ -1398,7 +1514,7 @@ button.cite:hover {
   flex: none;
   margin-left: auto;
   color: var(--text-3);
-  transition: transform 160ms var(--ease);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .findings.is-open .findings-chevron {
@@ -1411,16 +1527,12 @@ button.cite:hover {
 
 .finding-list {
   margin: 0;
-  padding: 0 6px 4px;
+  padding: 0 var(--space-1) var(--space-1);
   list-style: none;
 }
 
 .msg-attachment .finding-list {
-  align-self: stretch;
-  padding: 4px 0;
-  border-radius: var(--r);
-  background: var(--surface);
-  box-shadow: 0 0 0 1px var(--line);
+  padding: var(--space-1) 0 0;
 }
 
 .finding {
@@ -1428,57 +1540,57 @@ button.cite:hover {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: start;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
 }
 
 .finding + .finding {
-  margin-top: 1px;
-}
-
-.finding-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  min-width: 0;
-  padding: 7px 6px;
-  border: 0;
-  border-radius: var(--r-sm);
-  background: transparent;
-  text-align: left;
-}
-
-.finding-row .dot {
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
 .finding:hover {
   background: var(--hover);
 }
 
+.finding-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  text-align: left;
+}
+
+/* 점을 제목 첫 줄 가운데에 맞춘다 */
+.finding-row .dot {
+  margin-top: calc((1.45em - 8px) / 2);
+}
+
 .finding-main {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .finding-title {
   color: var(--text);
-  font-size: 12.5px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   line-height: 1.45;
 }
 
 .finding.sev-ok .finding-title,
 .finding.sev-info .finding-title {
   color: var(--text-2);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
 }
 
 .finding-props {
   overflow: hidden;
   color: var(--text-3);
-  font: 11px/1.5 var(--mono);
+  font: var(--text-caption) / 1.5 var(--mono);
   letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1491,34 +1603,38 @@ button.cite:hover {
 
 .finding-ids {
   display: flex;
-  gap: 3px;
-  padding: 7px 6px 0 0;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2) 0 0;
 }
 
-.finding-detail {
+.finding-detail-wrap {
   grid-column: 1 / -1;
-  margin: 0 8px 8px 28px;
+}
+
+/* 설명은 제목과 같은 왼쪽 선(행 여백 8 + 점 8 + 간격 8)에서 시작한다 */
+.finding-detail {
+  margin: 0;
+  padding: 0 var(--space-2) var(--space-2) var(--space-6);
   color: var(--text-2);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: var(--text-caption);
   overflow-wrap: anywhere;
 }
 
 .finding-kind {
   color: var(--text-3);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .findings-note {
   margin: 0;
-  padding: 4px 12px 11px;
+  padding: var(--space-1) var(--space-3) var(--space-3);
   color: var(--text-3);
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: var(--text-caption);
+  line-height: 1.5;
 }
 
-.draft-findings .findings {
-  box-shadow: 0 0 0 1px var(--line);
+.msg-attachment .findings-note {
+  padding: var(--space-1) var(--space-2) 0;
 }
 
 /* ───────── 입력 ───────── */
@@ -1527,29 +1643,28 @@ button.cite:hover {
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   max-height: 60vh;
   overflow-y: auto;
-  padding: 8px 10px 10px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
 }
 
 .examples {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .example-chip {
   flex: none;
-  height: 28px;
-  padding: 0 11px;
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-2);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: var(--text-caption);
   white-space: nowrap;
-  transition: background-color 120ms var(--ease), color 120ms var(--ease);
 }
 
 .example-chip:hover {
@@ -1557,16 +1672,19 @@ button.cite:hover {
   color: var(--text);
 }
 
+/* 입력 상자가 이 화면의 1순위 — 화면에서 유일하게 테두리·그림자를 함께 가진 면 */
 .composer-box {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 6px 6px 6px 10px;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid var(--line-strong);
-  border-radius: var(--r-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
-  transition: border-color 120ms var(--ease), box-shadow 120ms var(--ease);
+  transition:
+    border-color var(--motion-duration-instant) var(--motion-ease-out),
+    box-shadow var(--motion-duration-instant) var(--motion-ease-out);
 }
 
 .composer-box:focus-within {
@@ -1578,66 +1696,60 @@ button.cite:hover {
   box-shadow: 0 0 0 3px var(--pointer-bg);
 }
 
-.attach-card {
+/* 첨부 줄 — 상자 안에 또 상자를 두지 않고 선 한 줄로 질문 입력과 나눈다 */
+.attach-row {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
   min-width: 0;
-  margin: 0 0 2px -4px;
-  padding: 4px 2px 4px 8px;
-  border-radius: 10px;
-  background: var(--pointer-bg);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--line);
 }
 
-.attach-card-icon {
+.attach-row-icon {
   flex: none;
   color: var(--pointer);
 }
 
-.attach-card-text {
+.attach-row-text {
   display: flex;
   flex-direction: column;
   min-width: 0;
   flex: 1;
 }
 
-.attach-card-label {
+.attach-row-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
 }
 
-.attach-card-meta {
+.attach-row-meta {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-2);
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 
-.attach-card-actions {
+.attach-row-actions {
   display: flex;
   flex: none;
-}
-
-.attach-card-actions .icon-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--pointer) 12%, transparent);
 }
 
 .picking-banner {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 2px -4px;
-  padding: 6px 8px;
-  border-radius: 10px;
-  background: var(--pointer-bg);
+  gap: var(--space-2);
+  min-height: var(--control-sm);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--pointer-line);
   color: var(--pointer);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
 }
 
 .picking-text {
@@ -1647,9 +1759,10 @@ button.cite:hover {
 
 .picking-keys {
   color: var(--text-2);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
 }
 
+/* 페이지 클릭을 기다리는 동안만 도는 상태 표시. 동작 줄이기에서는 멈춘다 */
 .picking-pulse {
   width: 8px;
   height: 8px;
@@ -1671,13 +1784,11 @@ button.cite:hover {
   min-height: 24px;
   max-height: 160px;
   width: 100%;
-  padding: 4px 4px 2px 0;
+  padding: var(--space-1) var(--space-1) 0 0;
   border: 0;
   outline: none;
   background: transparent;
   resize: none;
-  font-size: 13px;
-  line-height: 1.55;
 }
 
 .composer-input::placeholder {
@@ -1687,25 +1798,24 @@ button.cite:hover {
 .composer-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 0;
-  margin-left: -4px;
+  margin-left: calc(var(--space-1) * -1);
 }
 
 .pick-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1);
   flex: none;
-  height: 30px;
-  padding: 0 10px 0 8px;
+  height: var(--control-md);
+  padding: 0 var(--space-3) 0 var(--space-2);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-2);
   color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
-  transition: background-color 120ms var(--ease);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
 }
 
 .pick-btn:hover:not(:disabled) {
@@ -1728,20 +1838,19 @@ button.cite:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 .send-btn {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: var(--control-md);
+  height: var(--control-md);
   flex: none;
   border: 0;
   border-radius: 50%;
   background: var(--ink);
   color: var(--ink-text);
-  transition: opacity 120ms var(--ease), background-color 120ms var(--ease);
 }
 
 .send-btn:hover:not(:disabled) {
@@ -1753,38 +1862,31 @@ button.cite:hover {
   color: var(--text-3);
 }
 
-.send-btn.is-stop {
-  background: var(--ink);
-  color: var(--ink-text);
-}
-
 /* ───────── 알림 ───────── */
 
 .toasts {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .toasts-floating {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 12px;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: var(--space-3);
   z-index: 40;
 }
 
 .toast {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 9px 8px 9px 11px;
-  border-radius: var(--r-sm);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
   color: var(--text);
-  font-size: 12.5px;
-  line-height: 1.5;
-  animation: pop-in 160ms var(--ease);
+  animation: rise-in var(--motion-duration-base) var(--motion-ease-out);
 }
 
 .toasts-floating .toast {
@@ -1794,7 +1896,7 @@ button.cite:hover {
 
 .toast-icon {
   flex: none;
-  margin-top: 2px;
+  margin-top: var(--space-1);
   color: var(--text-3);
 }
 
@@ -1818,25 +1920,25 @@ button.cite:hover {
 
 .toast-action {
   flex: none;
-  height: 24px;
-  padding: 0 9px;
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
   color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
 }
 
 .toast-close {
   flex: none;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: var(--control-sm);
+  height: var(--control-sm);
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-3);
 }
@@ -1846,80 +1948,101 @@ button.cite:hover {
   color: var(--text);
 }
 
-/* ───────── 미리보기 시트 ───────── */
-
-.sheet-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: flex-end;
-  background: rgba(10, 11, 14, 0.32);
-  animation: fade-in 140ms var(--ease);
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-}
+/* ───────── 미리보기 시트(네이티브 dialog) ─────────
+   열림·닫힘은 animation이다 — display가 바뀌는 순간에는 transition이 걸리지 않는다.
+   닫힘은 data-closing 동안 재생하고, 끝나면 컴포넌트가 close()한다. */
 
 .sheet {
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  max-height: 92%;
-  border-radius: 18px 18px 0 0;
+  max-width: 100%;
+  max-height: 92dvh;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   background: var(--surface);
+  color: var(--text);
   box-shadow: var(--shadow);
-  animation: sheet-up 200ms var(--ease);
+  overflow: hidden;
 }
 
-@keyframes sheet-up {
+.sheet[open] {
+  animation: sheet-in var(--motion-duration-slow) var(--motion-ease-drawer);
+}
+
+.sheet::backdrop {
+  background: rgba(10, 11, 14, 0.32);
+}
+
+.sheet[open]::backdrop {
+  animation: fade-in var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+/* 퇴장도 ease-out, 시간은 진입의 3/4 */
+.sheet[data-closing] {
+  animation: sheet-out calc(var(--motion-duration-slow) * var(--motion-exit-ratio)) var(--motion-ease-out) forwards;
+}
+
+.sheet[data-closing]::backdrop {
+  animation: fade-out calc(var(--motion-duration-slow) * var(--motion-exit-ratio)) var(--motion-ease-out) forwards;
+}
+
+@keyframes sheet-in {
   from {
-    transform: translateY(24px);
-    opacity: 0.6;
+    transform: translateY(100%);
   }
+}
+
+@keyframes sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* 시트를 꽉 채워야 안쪽 클릭이 바깥(::backdrop) 클릭으로 잡히지 않는다 */
+.sheet-frame {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
 }
 
 .sheet-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 8px 6px 16px;
+  padding: var(--space-3) var(--space-2) var(--space-2) var(--space-4);
 }
 
 .sheet-head h2 {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-heading);
+  font-weight: var(--weight-semibold);
 }
 
 .sheet-body {
   min-height: 0;
   overflow-y: auto;
-  padding: 0 16px 18px;
+  overscroll-behavior: contain;
+  padding: 0 var(--space-4) var(--space-6);
 }
 
 .sheet-intro {
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-1);
   color: var(--text-2);
-  font-size: 12.5px;
 }
 
 .sheet-stats {
-  margin: 0 0 12px;
+  margin: 0 0 var(--space-3);
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
+/* 설정 행처럼 선으로 나눈다 — 시트 안에 또 상자를 두지 않는다 */
 .sheet-toggles {
   display: flex;
   flex-direction: column;
-  margin-bottom: 6px;
-  padding: 2px 12px;
-  border-radius: var(--r);
-  background: var(--surface-2);
+  margin-bottom: var(--space-2);
+  border-block: 1px solid var(--line);
 }
 
 .sheet-toggles .switch-row + .switch-row {
@@ -1927,10 +2050,10 @@ button.cite:hover {
 }
 
 .sheet-subtitle {
-  margin: 16px 0 6px;
+  margin: var(--space-4) 0 var(--space-2);
   color: var(--text-2);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
 }
 
 .element-list {
@@ -1942,11 +2065,11 @@ button.cite:hover {
 .element-list li label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 0;
-  padding: 4px 2px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: var(--space-1);
+  border-radius: var(--radius-control);
+  font-size: var(--text-caption);
 }
 
 .element-list li label:hover {
@@ -1965,7 +2088,6 @@ button.cite:hover {
   flex: none;
   width: 56px;
   color: var(--text-3);
-  font-size: 11.5px;
 }
 
 .element-label {
@@ -1973,14 +2095,13 @@ button.cite:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11.5px;
 }
 
 .limitation-list {
   margin: 0;
-  padding-left: 18px;
+  padding-left: var(--space-6);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 .sheet-payload-head {
@@ -1989,18 +2110,14 @@ button.cite:hover {
   justify-content: space-between;
 }
 
-.sheet-payload-head .sheet-subtitle {
-  margin-bottom: 6px;
-}
-
 .payload {
   max-height: 320px;
   margin: 0;
-  padding: 11px 12px;
+  padding: var(--space-3);
   overflow: auto;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
-  font-size: 11px;
+  font-size: var(--text-caption);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -2012,8 +2129,8 @@ button.cite:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 9px 0;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
   cursor: pointer;
 }
 
@@ -2029,25 +2146,24 @@ button.cite:hover {
 }
 
 .switch-label {
-  font-size: 12.5px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .switch-desc {
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
 }
 
 .switch {
   appearance: none;
   position: relative;
   flex: none;
-  width: 32px;
-  height: 19px;
+  width: 36px;
+  height: 20px;
   margin: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--line-strong);
-  transition: background-color 140ms var(--ease);
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .switch::after {
@@ -2055,12 +2171,12 @@ button.cite:hover {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  transition: transform 140ms var(--ease);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .switch:checked {
@@ -2068,7 +2184,7 @@ button.cite:hover {
 }
 
 .switch:checked::after {
-  transform: translateX(13px);
+  transform: translateX(16px);
   background: var(--ink-text);
 }
 
@@ -2078,35 +2194,39 @@ button.cite:hover {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 6px 12px 28px;
+  padding: var(--space-2) var(--page-inline) var(--space-8);
 }
 
 .view-head {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin: 4px 2px 12px;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 var(--space-4);
 }
 
 .view-head h2 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
   letter-spacing: -0.02em;
 }
 
+.view-head .muted {
+  font-size: var(--text-caption);
+}
+
 .view-foot {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .search {
   display: flex;
   align-items: center;
-  gap: 7px;
-  height: 34px;
-  margin-bottom: 10px;
-  padding: 0 11px;
-  border-radius: var(--r-sm);
+  gap: var(--space-2);
+  height: var(--control-md);
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-control);
   background: var(--surface-2);
   color: var(--text-3);
 }
@@ -2125,7 +2245,7 @@ button.cite:hover {
 }
 
 .empty-history {
-  margin: 28px 0;
+  margin: var(--space-8) 0;
   text-align: center;
 }
 
@@ -2139,8 +2259,8 @@ button.cite:hover {
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 2px;
-  border-radius: var(--r-sm);
+  gap: var(--space-1);
+  border-radius: var(--radius-control);
 }
 
 .history-list li:hover,
@@ -2151,12 +2271,12 @@ button.cite:hover {
 .history-item {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-1);
   flex: 1;
   min-width: 0;
-  padding: 9px 8px;
+  padding: var(--space-2);
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: transparent;
   text-align: left;
 }
@@ -2165,107 +2285,100 @@ button.cite:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .history-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   min-width: 0;
   color: var(--text-3);
-  font-size: 11.5px;
+  font-size: var(--text-caption);
   white-space: nowrap;
-}
-
-.history-meta .provider-avatar {
-  width: 15px;
-  height: 15px;
-  border-radius: 5px;
-  font-size: 9px;
 }
 
 .history-meta code {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 11px;
 }
 
 .history-delete {
-  margin: 6px 4px 0 0;
+  margin: var(--space-1) var(--space-1) 0 0;
   opacity: 0;
 }
 
 .history-list li:hover .history-delete,
-.history-delete:focus-visible {
+.history-list li:focus-within .history-delete {
   opacity: 1;
 }
 
 .section-title {
-  margin: 22px 2px 8px;
+  margin: var(--space-6) 0 var(--space-2);
   color: var(--text-2);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
 }
 
 .section-title:first-of-type {
-  margin-top: 6px;
+  margin-top: var(--space-2);
 }
 
 .section-desc {
-  margin: 0 2px 10px;
+  margin: 0 0 var(--space-3);
   color: var(--text-2);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: var(--text-caption);
+  line-height: 1.6;
 }
 
+/* API 키는 설정의 1순위 — 제공자마다 독립 단위라 이것만 카드로 둔다.
+   나머지 구역은 구역 라벨과 간격으로만 나눈다 */
 .card {
-  margin-bottom: 8px;
-  padding: 12px;
-  border-radius: var(--r);
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
   background: var(--surface);
   box-shadow: 0 0 0 1px var(--line);
-}
-
-.card .section-desc {
-  margin: 0 0 6px;
 }
 
 .card-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 10px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .card-head h3 {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
 }
 
 .card-head .badge {
   margin-left: auto;
 }
 
+.settings-block .section-desc {
+  margin-bottom: var(--space-2);
+}
+
 .key-form {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-2);
 }
 
 .key-form input[type='password'] {
   width: 100%;
-  height: 34px;
-  padding: 0 11px;
+  height: var(--control-md);
+  padding: 0 var(--space-3);
   border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-control);
   background: var(--bg);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--text-caption);
   letter-spacing: 0;
 }
 
@@ -2277,18 +2390,18 @@ button.cite:hover {
 .radio-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 14px;
+  gap: var(--space-1) var(--space-4);
   margin: 0;
   padding: 0;
   border: 0;
   color: var(--text-2);
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 .radio-row label {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 .radio-row input {
@@ -2299,8 +2412,8 @@ button.cite:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
 }
 
 .key-actions .link-btn {
@@ -2309,9 +2422,9 @@ button.cite:hover {
 
 .privacy-card {
   display: flex;
-  gap: 10px;
+  gap: var(--space-3);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: var(--text-caption);
   line-height: 1.6;
 }
 
@@ -2323,19 +2436,20 @@ button.cite:hover {
 
 .privacy-card ul {
   margin: 0;
-  padding-left: 16px;
+  padding-left: var(--space-4);
 }
 
-/* ───────── 첫 실행 동의 ───────── */
+/* ───────── 첫 실행 동의 ─────────
+   시작 안내 화면의 관례: 내용은 스크롤하고 주 버튼 하나는 하단에 고정한다 */
 
-.consent {
+.consent-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 28px 18px 20px;
+  padding: var(--space-8) var(--page-inline) var(--space-4);
 }
 
-.consent-card {
-  display: flex;
-  flex-direction: column;
+.consent-inner {
   max-width: 440px;
   margin: 0 auto;
 }
@@ -2343,65 +2457,98 @@ button.cite:hover {
 .consent-brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-2);
 }
 
 .consent-brand h1 {
   margin: 0;
-  font-size: 19px;
-  font-weight: 600;
+  font-size: var(--text-title);
+  font-weight: var(--weight-semibold);
   letter-spacing: -0.02em;
 }
 
 .consent-lead {
-  margin: 12px 0 6px;
+  margin: var(--space-3) 0 var(--space-2);
   color: var(--text-2);
-  font-size: 13px;
 }
 
+/* 항목은 상자 대신 선으로 나눈 행 */
 .consent-list {
-  margin: 8px 0 20px;
-  padding: 4px 14px;
-  border-radius: var(--r);
-  background: var(--surface);
-  box-shadow: 0 0 0 1px var(--line);
+  margin: 0;
 }
 
 .consent-list dt {
-  margin-top: 12px;
-  font-size: 12.5px;
-  font-weight: 600;
+  margin-top: var(--space-4);
+  font-weight: var(--weight-semibold);
 }
 
 .consent-list dd {
-  margin: 3px 0 12px;
-  padding-bottom: 12px;
+  margin: var(--space-1) 0 0;
+  padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--line);
   color: var(--text-2);
-  font-size: 12.5px;
-  line-height: 1.6;
 }
 
 .consent-list dd:last-child {
   border-bottom: 0;
-  padding-bottom: 2px;
+  padding-bottom: 0;
+}
+
+.consent-actions {
+  flex: none;
+  padding: var(--space-3) var(--page-inline) var(--space-4);
+  border-top: 1px solid var(--line);
+  background: var(--bg);
 }
 
 .consent-accept {
+  display: flex;
   width: 100%;
-  height: 40px;
-  border-radius: var(--r);
+  max-width: 440px;
+  height: var(--control-lg);
+  margin: 0 auto;
 }
 
-/* ───────── 움직임 줄이기 ───────── */
+/* ───────── 움직임 줄이기 ─────────
+   이동·확대는 끄고 짧은 페이드만 남긴다. 0ms로 두면 animationend가 오지 않아 시트가 닫히지 않는다 */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  :root {
+    --motion-duration-instant: 1ms;
+    --motion-duration-fast: 1ms;
+    --motion-duration-base: 80ms;
+    --motion-duration-slow: 80ms;
+    --press-release: 1ms;
+  }
+
+  .menu,
+  .toast {
+    animation-name: fade-in;
+  }
+
+  .sheet[open] {
+    animation-name: fade-in;
+  }
+
+  .sheet[data-closing] {
+    animation-name: fade-out;
+  }
+
+  .collapse,
+  .collapse[data-open='true'],
+  .findings-chevron {
+    transition: none;
+  }
+
+  .dots,
+  .cursor,
+  .picking-pulse {
+    animation: none;
+  }
+
+  :is(.btn, .icon-btn, .chip-btn, .example-chip, .pick-btn, .send-btn, .toast-action):active:not(:disabled) {
+    transform: none;
+    filter: brightness(0.92);
   }
 }
 

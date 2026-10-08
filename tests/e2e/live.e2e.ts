@@ -77,7 +77,7 @@ describe('실제 API — 무효한 키', () => {
     await seedKey('openai', 'sk-proj-invalid-e2e-key-0000000000000000');
     panel.once('dialog', (dialog) => void dialog.accept());
     await chooseModel(panel, 'GPT-6.1 Sol');
-    await panel.waitForSelector('.attach-card', { timeout: 8000 }).catch(() => pick(panel, page, '.notice-title'));
+    await panel.waitForSelector('.attach-row', { timeout: 8000 }).catch(() => pick(panel, page, '.notice-title'));
     await askAndWaitStart(panel, '실제 401 확인').catch(() => {});
     await waitForAnswer(panel, 'error', 30000);
     const answer = await lastAnswer(panel);
@@ -91,7 +91,7 @@ describe.skipIf(!keys.ANTHROPIC_API_KEY)('실제 API — Anthropic 실제 키', 
     await seedKey('anthropic', keys.ANTHROPIC_API_KEY!);
     panel.once('dialog', (dialog) => void dialog.accept());
     await chooseModel(panel, 'Claude Sonnet 5.5');
-    await panel.waitForSelector('.attach-card', { timeout: 8000 }).catch(() => pick(panel, page, '.seller-name'));
+    await panel.waitForSelector('.attach-row', { timeout: 8000 }).catch(() => pick(panel, page, '.seller-name'));
     await askAndWaitStart(panel, '이 텍스트가 왜 말줄임되지 않을까?');
     await panel.waitForSelector('.msg-assistant.status-streaming', { timeout: 60000 });
     await waitForAnswer(panel, 'complete', 180000);
@@ -110,7 +110,7 @@ describe.skipIf(!keys.OPENAI_API_KEY)('실제 API — OpenAI 실제 키', () => 
     await seedKey('openai', keys.OPENAI_API_KEY!);
     panel.once('dialog', (dialog) => void dialog.accept());
     await chooseModel(panel, 'GPT-6.1 Sol');
-    await panel.waitForSelector('.attach-card', { timeout: 8000 }).catch(() => pick(panel, page, '.seller-name'));
+    await panel.waitForSelector('.attach-row', { timeout: 8000 }).catch(() => pick(panel, page, '.seller-name'));
     await askAndWaitStart(panel, '이 텍스트가 왜 말줄임되지 않을까?');
     await waitForAnswer(panel, 'complete', 180000);
     const answer = await lastAnswer(panel);
