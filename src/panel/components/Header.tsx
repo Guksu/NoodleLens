@@ -152,7 +152,7 @@ export function Header() {
             }}
             title={ready ? '모델 선택' : '모델 선택 · API 키가 필요합니다'}
           >
-            <ProviderAvatar provider={current.provider} warn={!ready} />
+            <ProviderAvatar provider={current.provider} />
             <span className="model-button-label">{modelLabel(current.provider, current.model)}</span>
             <ChevronDown size={14} className="model-button-chevron" aria-hidden="true" />
           </button>

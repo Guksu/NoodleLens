@@ -18,16 +18,18 @@ import {
   startPicking,
 } from '../actions';
 import { draftKey, useStore } from '../store';
+import { LiveStatusText, PageRow, TargetRow, useTargetSnapshot } from './TargetBar';
 import { Toasts } from './Toasts';
 import { IconButton } from './ui';
 
-const EXAMPLES = ['왜 말줄임되지 않을까?', '가로 스크롤의 원인일까?', '왜 가운데로 오지 않을까?', '레이아웃을 밀어내나?'];
+// 첫 질문의 실마리 — 셋까지만 두고, 질문을 쓰기 시작하면 사라진다
+const EXAMPLES = ['왜 말줄임되지 않을까?', '가로 스크롤의 원인일까?', '왜 가운데로 오지 않을까?'];
 
 function formatTokens(value: number): string {
   return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value);
 }
 
-/** 이번 질문에 첨부되는 자료. 입력 상자 안 맨 위에 한 줄로 둔다. */
+/** 이번 질문에 첨부되는 자료. 입력 상자 안 맨 위 한 줄 — 대상 정보는 화면에서 이 한 곳에만 있다. */
 function AttachmentRow({ snapshot }: { snapshot: StoredSnapshot }) {
   const target = getTarget(snapshot);
   const tokens = useMemo(
@@ -39,12 +41,15 @@ function AttachmentRow({ snapshot }: { snapshot: StoredSnapshot }) {
     <div className="attach-row" aria-label="이번 질문에 첨부되는 자료">
       <Paperclip size={13} className="attach-row-icon" aria-hidden="true" />
       <span className="attach-row-text">
-        <code className="attach-row-label" title={target.label}>
+        <code className="attach-row-label target-label" title={target.label}>
           {target.label}
         </code>
         <span className="attach-row-meta">
-          요소 {snapshot.elements.length - excludedCount}개 · 약 {formatTokens(tokens)} 토큰
-          {excludedCount > 0 && ` · 제외 ${excludedCount}`}
+          <span className="target-dims">
+            {Math.round(target.rect.width * 10) / 10} × {Math.round(target.rect.height * 10) / 10} · {target.styles.display}
+          </span>
+          {' · '}요소 {snapshot.elements.length - excludedCount}개 · 약 {formatTokens(tokens)} 토큰
+          {excludedCount > 0 && ` · 제외 ${excludedCount}`} <LiveStatusText snapshot={snapshot} />
         </span>
       </span>
       <span className="attach-row-actions">
@@ -73,6 +78,7 @@ export function Composer() {
   const hasMessages = useStore((s) => Boolean(s.activeId && (s.messages[s.activeId]?.length ?? 0) > 0));
   const hasTarget = useStore((s) => Boolean(s.drafts[draftKey(s)]?.attachment || (s.activeId && s.conversations.find((c) => c.id === s.activeId)?.lastSnapshotId)));
   const activeId = useStore((s) => s.activeId);
+  const { snapshot: target } = useTargetSnapshot();
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   const text = draft?.text ?? '';
@@ -133,7 +139,10 @@ export function Composer() {
             </button>
           </div>
         ) : (
-          attachment && <AttachmentRow snapshot={attachment} />
+          <>
+            {(!target || access !== 'granted') && <PageRow />}
+            {attachment ? <AttachmentRow snapshot={attachment} /> : target && <TargetRow snapshot={target} />}
+          </>
         )}
         <textarea
           ref={textRef}
