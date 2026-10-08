@@ -1,9 +1,10 @@
 /**
  * 기본 검사 결과. 항목은 한 줄 제목 + 근거 값 한 줄로 보여 주고, 누르면 설명을 펼친다.
  * 색은 등급(문제·가능성·정상·참고)에만 쓴다. '측정 사실'도 문제를 나타내면 '문제'로 묶는다.
+ * 펼침은 grid-template-rows 0fr↔1fr 전이(.collapse)라 닫힌 내용도 DOM에 남고 visibility로 숨긴다.
  */
 import { ChevronDown } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState, type ReactNode } from 'react';
 import { analyzeSnapshot, type Finding } from '../../shared/analysis';
 import type { StoredSnapshot } from '../../shared/snapshot';
 import { highlight } from '../actions';
@@ -29,14 +30,24 @@ function propsLine(finding: Finding): string {
     .join(' · ');
 }
 
+/** 높이 측정 없이 내용만큼 펼치는 영역. 닫히면 안쪽 버튼이 Tab 순서에서 빠진다. */
+function Collapse({ id, open, className = '', children }: { id: string; open: boolean; className?: string; children: ReactNode }) {
+  return (
+    <div id={id} className={`collapse ${className}`} data-open={open}>
+      <div className="collapse-inner">{children}</div>
+    </div>
+  );
+}
+
 function FindingRow({ finding, snapshotId, excluded }: { finding: Finding; snapshotId: string; excluded: Set<string> }) {
   const [open, setOpen] = useState(false);
+  const detailId = useId();
   const severity = SEVERITY[finding.kind];
   const ids = [...new Set(finding.evidence.map((e) => e.elementId))];
   const props = propsLine(finding);
   return (
     <li className={`finding sev-${severity} ${open ? 'is-open' : ''}`}>
-      <button type="button" className="finding-row" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="finding-row" aria-expanded={open} aria-controls={detailId} onClick={() => setOpen((v) => !v)}>
         <span className="dot" aria-label={SEVERITY_LABEL[severity]} />
         <span className="finding-main">
           <span className="finding-title">{finding.title}</span>
@@ -58,11 +69,11 @@ function FindingRow({ finding, snapshotId, excluded }: { finding: Finding; snaps
           ))}
         </span>
       )}
-      {open && (
+      <Collapse id={detailId} open={open} className="finding-detail-wrap">
         <p className="finding-detail">
           <span className="finding-kind">{KIND_LABEL[finding.kind]}</span> {finding.detail}
         </p>
-      )}
+      </Collapse>
     </li>
   );
 }
@@ -87,11 +98,12 @@ export function FindingsCard({
     return out;
   }, [findings]);
   const [open, setOpen] = useState(defaultOpen);
+  const listId = useId();
   const excluded = new Set(snapshot.exclusions.elementIds);
 
   return (
     <section className={`findings ${open ? 'is-open' : ''}`}>
-      <button type="button" className="findings-head" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="findings-head" aria-expanded={open} aria-controls={listId} onClick={() => setOpen((v) => !v)}>
         <span className="findings-title">{title}</span>
         <span className="findings-summary">
           {(['issue', 'hint', 'ok'] as Severity[])
@@ -104,16 +116,14 @@ export function FindingsCard({
         </span>
         <ChevronDown size={14} className="findings-chevron" aria-hidden="true" />
       </button>
-      {open && (
-        <>
-          <ul className="finding-list">
-            {sorted.map((finding, index) => (
-              <FindingRow key={`${finding.code}-${index}`} finding={finding} snapshotId={snapshot.id} excluded={excluded} />
-            ))}
-          </ul>
-          <p className="findings-note">측정값으로 계산한 결과입니다. ‘가능성’은 원인 후보이며 확정이 아닙니다. 항목을 누르면 설명이 펼쳐집니다.</p>
-        </>
-      )}
+      <Collapse id={listId} open={open}>
+        <ul className="finding-list">
+          {sorted.map((finding, index) => (
+            <FindingRow key={`${finding.code}-${index}`} finding={finding} snapshotId={snapshot.id} excluded={excluded} />
+          ))}
+        </ul>
+        <p className="findings-note">측정값으로 계산한 결과입니다. ‘가능성’은 원인 후보이며 확정이 아닙니다. 항목을 누르면 설명이 펼쳐집니다.</p>
+      </Collapse>
     </section>
   );
 }

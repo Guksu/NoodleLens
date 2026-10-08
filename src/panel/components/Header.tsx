@@ -1,5 +1,5 @@
 import { Check, ChevronDown, History, KeyRound, Settings, SquarePen } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import type { ProviderId } from '../../shared/conversation';
 import { PROVIDERS, REAL_PROVIDERS, modelLabel } from '../../providers/registry';
 import { chooseModel, newAnalysis, providerReady, setView } from '../actions';
@@ -15,7 +15,11 @@ function useCurrentModel() {
   }, shallowEqual);
 }
 
-function ModelMenu({ onClose }: { onClose: () => void }) {
+/**
+ * 모델 메뉴. 항목은 tabIndex -1이고 방향키·Home·End로 옮긴다(로빙 포커스).
+ * Esc나 항목 선택으로 닫으면 포커스가 모델 버튼으로 돌아가고, 바깥을 눌러 닫으면 포커스를 뺏지 않는다.
+ */
+function ModelMenu({ onClose }: { onClose: (restoreFocus: boolean) => void }) {
   const current = useCurrentModel();
   const showMock = useStore((s) => s.settings.showMock || __NL_DEV__);
   const keyStatus = useStore((s) => s.keyStatus);
@@ -24,17 +28,30 @@ function ModelMenu({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) onClose();
+      const picker = ref.current?.parentElement;
+      if (picker && !picker.contains(event.target as Node)) onClose(false);
     };
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
     document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
     ref.current?.querySelector<HTMLButtonElement>('[aria-checked="true"]')?.focus();
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
+    return () => document.removeEventListener('mousedown', onDown);
   }, [onClose]);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const items = [...(ref.current?.querySelectorAll<HTMLButtonElement>('[role^="menuitem"]') ?? [])];
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    const move = (next: number) => {
+      event.preventDefault();
+      items[(next + items.length) % items.length]?.focus();
+    };
+    if (event.key === 'ArrowDown') move(index + 1);
+    else if (event.key === 'ArrowUp') move(index < 0 ? -1 : index - 1);
+    else if (event.key === 'Home') move(0);
+    else if (event.key === 'End') move(-1);
+    else if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose(true);
+    } else if (event.key === 'Tab') onClose(false);
+  };
 
   const providers: ProviderId[] = showMock ? [...REAL_PROVIDERS, 'mock'] : REAL_PROVIDERS;
 
@@ -45,27 +62,29 @@ function ModelMenu({ onClose }: { onClose: () => void }) {
       );
       if (!ok) return;
     }
-    onClose();
+    onClose(true);
     await chooseModel(provider, model);
   };
 
   return (
-    <div className="menu model-menu" role="menu" ref={ref}>
+    <div className="menu model-menu" role="menu" aria-label="모델 선택" ref={ref} onKeyDown={onKeyDown}>
       {providers.map((provider) => {
         const info = PROVIDERS[provider];
         const ready = provider === 'mock' || keyStatus[provider as 'openai' | 'anthropic'].present;
         const otherProvider = current.locked && hasMessages && provider !== current.provider;
         return (
-          <div key={provider} className="menu-group">
+          <div key={provider} className="menu-group" role="group" aria-label={info.label}>
             <div className="menu-group-title">
               <span>{info.label}</span>
               {otherProvider && <span className="menu-hint">새 분석으로 시작</span>}
               {!ready && (
                 <button
                   type="button"
+                  role="menuitem"
+                  tabIndex={-1}
                   className="menu-key-link"
                   onClick={() => {
-                    onClose();
+                    onClose(false);
                     setView('settings');
                   }}
                 >
@@ -81,6 +100,7 @@ function ModelMenu({ onClose }: { onClose: () => void }) {
                   type="button"
                   role="menuitemradio"
                   aria-checked={selected}
+                  tabIndex={-1}
                   className={`menu-item ${selected ? 'is-selected' : ''}`}
                   onClick={() => void pick(provider, model.id)}
                 >
@@ -106,6 +126,11 @@ export function Header() {
   const view = useStore((s) => s.view);
   const ready = useStore((s) => providerReady(s, current.provider));
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const close = useCallback((restoreFocus: boolean) => {
+    setOpen(false);
+    if (restoreFocus) triggerRef.current?.focus();
+  }, []);
 
   return (
     <header className="header">
@@ -113,18 +138,25 @@ export function Header() {
         <Logo />
         <div className="model-picker">
           <button
+            ref={triggerRef}
             type="button"
             className="model-button"
             aria-haspopup="menu"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
+            onKeyDown={(event) => {
+              if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+                event.preventDefault();
+                setOpen(true);
+              }
+            }}
             title={ready ? '모델 선택' : '모델 선택 · API 키가 필요합니다'}
           >
             <ProviderAvatar provider={current.provider} warn={!ready} />
             <span className="model-button-label">{modelLabel(current.provider, current.model)}</span>
             <ChevronDown size={14} className="model-button-chevron" aria-hidden="true" />
           </button>
-          {open && <ModelMenu onClose={() => setOpen(false)} />}
+          {open && <ModelMenu onClose={close} />}
         </div>
       </div>
       <nav className="header-actions" aria-label="패널 메뉴">

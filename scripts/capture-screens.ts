@@ -14,6 +14,7 @@ import {
   pick,
   sleep,
   waitForAnswer,
+  waitSheetSettled,
 } from '../tests/e2e/harness';
 
 const out = process.argv[2] ?? join(import.meta.dirname, '..', 'docs', 'images');
@@ -41,8 +42,10 @@ try {
   await shot('05-answer');
   await panel.click('.msg-attachment .attach-chip');
   await panel.waitForSelector('.sheet');
+  await waitSheetSettled(panel);
   await shot('06-preview');
   await panel.click('.sheet-head .icon-btn');
+  await panel.waitForFunction(() => !document.querySelector('.sheet'));
   await askAndWaitStart(panel, '한도 오류 재현 #mock:rate-limit').catch(() => {});
   await waitForAnswer(panel, 'error');
   await shot('07-error');

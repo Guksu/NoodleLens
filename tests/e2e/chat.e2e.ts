@@ -51,8 +51,25 @@ describe('채팅 (모의 제공자)', () => {
     expect(await panel.$eval('.msg-assistant .cite.is-unknown', (el) => el.textContent)).toBe('E999?');
     expect(answer.foot).toContain('수집 자료에 없는 식별자 1개(E999)');
     // 보낸 뒤에는 입력창의 첨부가 비고, 위쪽 대상 표시줄은 그대로 남는다
-    expect(await panel.$('.attach-card')).toBeNull();
+    expect(await panel.$('.attach-row')).toBeNull();
     expect(await text(panel, '.target-label')).toBe('div.seller-name');
+  });
+
+  it('모델 메뉴는 방향키로 옮기고 Esc로 닫으면 포커스가 모델 버튼으로 돌아온다', async () => {
+    const focused = () => panel.evaluate(() => document.activeElement?.closest('.menu-item, .model-button, .menu-key-link')?.className ?? '');
+    await panel.focus('.model-button');
+    await panel.keyboard.press('ArrowDown');
+    await panel.waitForSelector('.model-menu');
+    // 열면 지금 고른 모델에 포커스가 간다
+    expect(await panel.evaluate(() => document.activeElement?.getAttribute('aria-checked'))).toBe('true');
+    const first = await panel.evaluate(() => document.activeElement?.textContent);
+    await panel.keyboard.press('ArrowDown');
+    expect(await panel.evaluate(() => document.activeElement?.textContent)).not.toBe(first);
+    // 항목은 Tab 순서에 들어가지 않는다
+    expect(await panel.$$eval('.model-menu [role^="menuitem"]', (els) => els.every((el) => (el as HTMLElement).tabIndex === -1))).toBe(true);
+    await panel.keyboard.press('Escape');
+    await panel.waitForFunction(() => !document.querySelector('.model-menu'));
+    expect(await focused()).toContain('model-button');
   });
 
   it('답변의 근거 칩을 누르면 페이지에서 요소를 강조한다', async () => {
@@ -168,7 +185,7 @@ describe('채팅 (모의 제공자)', () => {
       }
     }
     await panel.waitForSelector('.msg-assistant.status-cancelled', { timeout: 5000 });
-    expect(await text(panel, '.target-card')).toContain('div.seller-name');
+    expect(await text(panel, '.target-row')).toContain('div.seller-name');
   });
 
   it('생성 중 패널을 닫으면 다시 열 때 연결 끊김(패널 닫힘)으로 정리된다', async () => {

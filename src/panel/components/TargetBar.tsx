@@ -67,7 +67,7 @@ export function TargetBar() {
     <section className="context" aria-label="분석 대상">
       <PageRow />
       {snapshot && target && (
-        <div className={`target-card ${stale ? 'is-stale' : ''}`}>
+        <div className={`target-row ${stale ? 'is-stale' : ''}`}>
           <span className="el-id">{target.id}</span>
           <span className="target-text">
             <span className="target-line">

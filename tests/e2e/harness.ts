@@ -137,7 +137,15 @@ export async function pick(panel: Page, page: Page, selector: string) {
   await sleep(80);
   await page.mouse.click(point.x, point.y);
   await panel.waitForFunction(() => !document.querySelector('.picking-banner'), { timeout: 5000 });
-  await panel.waitForSelector('.attach-card', { timeout: 5000 });
+  await panel.waitForSelector('.attach-row', { timeout: 5000 });
+}
+
+/** 미리보기 시트가 열리는 애니메이션(아래에서 올라옴)이 끝날 때까지 기다린다. 움직이는 중에는 클릭 좌표가 어긋난다 */
+export async function waitSheetSettled(panel: Page) {
+  await panel.waitForFunction(() => {
+    const sheet = document.querySelector('.sheet');
+    return Boolean(sheet) && sheet!.getAnimations({ subtree: true }).every((a) => a.playState !== 'running');
+  });
 }
 
 export async function chooseModel(panel: Page, label: string) {
